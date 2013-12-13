@@ -125,6 +125,9 @@ class PeterActivity(activity.Activity):
         self._speed_range.set_value(200)
         self._pygamecanvas.run_pygame(self.game.run)
 
+    def get_preview(self):
+        return self._pygamecanvas.get_preview()
+
     def __configure_cb(self, event):
         ''' Screen size has changed '''
         logging.debug(self._pygamecanvas.get_allocation())
