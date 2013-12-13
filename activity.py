@@ -2,6 +2,7 @@
 # my standard link between sugar and my activity
 """
     Copyright (C) 2010  Peter Hewitt
+    Copyright (C) 2013  Ignacio Rodriguez
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,16 +14,16 @@
 from gettext import gettext as _
 import logging
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import Gdk
 
-from sugar.activity import activity
-from sugar.graphics.toolbarbox import ToolbarBox
-from sugar.activity.widgets import ActivityToolbarButton, StopButton
-from sugar.graphics.toolbarbox import ToolbarButton
-from sugar.graphics.toolbutton import ToolButton
-from sugar.graphics.style import GRID_CELL_SIZE
-from sugar import profile
+from sugar3.activity import activity
+from sugar3.graphics.toolbarbox import ToolbarBox
+from sugar3.activity.widgets import ActivityToolbarButton, StopButton
+from sugar3.graphics.toolbarbox import ToolbarButton
+from sugar3.graphics.toolbutton import ToolButton
+from sugar3.graphics.style import GRID_CELL_SIZE
+from sugar3 import profile
 
 import pygame
 import sugargame.canvas
@@ -78,20 +79,20 @@ class PeterActivity(activity.Activity):
         red.connect('clicked', self._button_cb, 'red')
         red.show()
 
-        separator = gtk.SeparatorToolItem()
+        separator = Gtk.SeparatorToolItem()
         separator.props.draw = True
         toolbox.toolbar.insert(separator, -1)
         separator.show()
 
-        label = gtk.Label('')
+        label = Gtk.Label('')
         label.set_use_markup(True)
         label.show()
-        labelitem = gtk.ToolItem()
+        labelitem = Gtk.ToolItem()
         labelitem.add(label)
         toolbox.toolbar.insert(labelitem, -1)
         labelitem.show()
 
-        separator = gtk.SeparatorToolItem()
+        separator = Gtk.SeparatorToolItem()
         separator.props.draw = False
         separator.set_expand(True)
         toolbox.toolbar.insert(separator, -1)
@@ -103,7 +104,7 @@ class PeterActivity(activity.Activity):
         stop_button.show()
 
         toolbox.show()
-        self.set_toolbox(toolbox)
+        self.set_toolbar_box(toolbox)
 
         # Create the game instance.
         self.game = Spirolaterals.Spirolaterals(colors)
@@ -115,9 +116,9 @@ class PeterActivity(activity.Activity):
         # read_file when resuming from the Journal.
         self.set_canvas(self._pygamecanvas)
         self.game.canvas = self._pygamecanvas
-
-        gtk.gdk.screen_get_default().connect('size-changed',
-                                             self.__configure_cb)
+        
+        Gdk.Screen.get_default().connect('size-changed',
+                                         self.__configure_cb)
 
         # Start the game running.
         self.game.set_cyan_button(cyan)
@@ -128,8 +129,8 @@ class PeterActivity(activity.Activity):
     def __configure_cb(self, event):
         ''' Screen size has changed '''
         logging.debug(self._pygamecanvas.get_allocation())
-        pygame.display.set_mode((gtk.gdk.screen_width(),
-                                 gtk.gdk.screen_height() - GRID_CELL_SIZE),
+        pygame.display.set_mode((Gdk.Screen.width(),
+                                 Gdk.Screen.height() - GRID_CELL_SIZE),
                                 pygame.RESIZABLE)
         self.game.save_pattern()
         self.game.g_init()
@@ -160,13 +161,12 @@ class PeterActivity(activity.Activity):
                                          self._speed_stepper_down_cb)
         self._speed_stepper_down.show()
 
-        self._adjustment = gtk.Adjustment(
+        self._adjustment = Gtk.Adjustment.new(
             200, self.LOWER, self.UPPER, 25, 100, 0)
         self._adjustment.connect('value_changed', self._speed_change_cb)
-        self._speed_range = gtk.HScale(self._adjustment)
+        self._speed_range = Gtk.HScale.new(self._adjustment)
         self._speed_range.set_inverted(True)
         self._speed_range.set_draw_value(False)
-        self._speed_range.set_update_policy(gtk.UPDATE_CONTINUOUS)
         self._speed_range.set_size_request(120, 15)
         self._speed_range.show()
 
@@ -175,7 +175,7 @@ class PeterActivity(activity.Activity):
         self._speed_stepper_up.connect('clicked', self._speed_stepper_up_cb)
         self._speed_stepper_up.show()
 
-        self._speed_range_tool = gtk.ToolItem()
+        self._speed_range_tool = Gtk.ToolItem()
         self._speed_range_tool.add(self._speed_range)
         self._speed_range_tool.show()
 
@@ -199,6 +199,6 @@ class PeterActivity(activity.Activity):
             self._speed_range.set_value(self.LOWER)
 
     def _speed_change_cb(self, button=None):
-        logging.debug(self._adjustment.value)
-        self.game.do_slider(self._adjustment.value)
+        logging.debug(self._adjustment.get_value())
+        self.game.do_slider(self._adjustment.get_value())
         return True
