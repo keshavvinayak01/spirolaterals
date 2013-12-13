@@ -20,6 +20,7 @@ from gi.repository import Gdk
 from sugar3.activity import activity
 from sugar3.graphics.toolbarbox import ToolbarBox
 from sugar3.activity.widgets import ActivityToolbarButton, StopButton
+from sugar3.graphics.toolbarbox import ToolbarButton
 from sugar3.graphics.toolbutton import ToolButton
 from sugar3.graphics.style import GRID_CELL_SIZE
 from sugar3 import profile
@@ -115,7 +116,7 @@ class PeterActivity(activity.Activity):
         # read_file when resuming from the Journal.
         self.set_canvas(self._pygamecanvas)
         self.game.canvas = self._pygamecanvas
-
+        
         Gdk.Screen.get_default().connect('size-changed',
                                          self.__configure_cb)
 
