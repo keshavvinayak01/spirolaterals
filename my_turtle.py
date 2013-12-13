@@ -8,7 +8,6 @@
     (at your option) any later version.
 
 """
-import logging
 import pygame
 
 import g
@@ -176,6 +175,7 @@ class TurtleClass:  # used only for keeping track of the right hand turtle
         utils.centre_blit(g.screen, img, (x2, y2), angle)
         '''
         self.between_levels = True
+
 
 def correct(current):
     return trace(g.goal) == trace(current)

@@ -9,7 +9,6 @@
 
 """
 import pygame
-import logging
 
 import utils
 
