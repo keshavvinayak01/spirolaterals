@@ -136,6 +136,10 @@ class PeterActivity(activity.Activity):
         self._speed_range.set_value(200)
         self.game.run(restore=True)
 
+    def get_preview(self):
+        """ Custom preview code to get image from pygame. """
+        return self._canvas.get_preview()
+
     def read_file(self, file_path):
         try:
             f = open(file_path, 'r')
