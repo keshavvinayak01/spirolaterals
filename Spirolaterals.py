@@ -12,11 +12,7 @@
 import os
 import sys
 import logging
-<<<<<<< HEAD
-import gtk
-=======
 from gi.repository import Gtk
->>>>>>> f42c34f942f59d8e6981a4acb73cadb65b7977c8
 import pygame
 
 import g
@@ -402,13 +398,8 @@ class Spirolaterals:
         while flushing:
             flushing = False
             if self.journal:
-<<<<<<< HEAD
-                while gtk.events_pending():
-                    gtk.main_iteration()
-=======
                 while Gtk.events_pending():
                     Gtk.main_iteration()
->>>>>>> f42c34f942f59d8e6981a4acb73cadb65b7977c8
             for event in pygame.event.get():
                 flushing = True
 
@@ -466,13 +457,8 @@ class Spirolaterals:
         while going:
             if self.journal:
                 # Pump GTK messages.
-<<<<<<< HEAD
-                while gtk.events_pending():
-                    gtk.main_iteration()
-=======
                 while Gtk.events_pending():
                     Gtk.main_iteration()
->>>>>>> f42c34f942f59d8e6981a4acb73cadb65b7977c8
 
             # Pump PyGame messages.
             for event in pygame.event.get():

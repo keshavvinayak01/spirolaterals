@@ -16,13 +16,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-<<<<<<< HEAD
-from sugar.activity import bundlebuilder
-
-bundlebuilder.start()
-
-=======
 from sugar3.activity import bundlebuilder
 
 bundlebuilder.start()
->>>>>>> f42c34f942f59d8e6981a4acb73cadb65b7977c8
