@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 # Emacs mod files
 *~
 
+=======
+>>>>>>> f42c34f942f59d8e6981a4acb73cadb65b7977c8
 *.py[cod]
 
 # C extensions
