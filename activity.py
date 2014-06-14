@@ -57,14 +57,17 @@ class PeterActivity(activity.Activity):
         toolbox.toolbar.insert(activity_button, 0)
         activity_button.show()
 
+        separator = Gtk.SeparatorToolItem()
+        separator.props.draw = False
+        toolbox.toolbar.insert(separator, -1)
+        separator.show()
+
         self._add_speed_slider(toolbox.toolbar)
 
-        cyan = ToolButton('cyan')
-        toolbox.toolbar.insert(cyan, -1)
-        cyan.set_tooltip(_('Next pattern'))
-        cyan.connect('clicked', self._button_cb, 'cyan')
-        cyan.set_sensitive(False)
-        cyan.show()
+        separator = Gtk.SeparatorToolItem()
+        separator.props.draw = False
+        toolbox.toolbar.insert(separator, -1)
+        separator.show()
 
         green = ToolButton('green')
         toolbox.toolbar.insert(green, -1)
@@ -78,8 +81,15 @@ class PeterActivity(activity.Activity):
         red.connect('clicked', self._button_cb, 'red')
         red.show()
 
+        cyan = ToolButton('cyan')
+        toolbox.toolbar.insert(cyan, -1)
+        cyan.set_tooltip(_('Next pattern'))
+        cyan.connect('clicked', self._button_cb, 'cyan')
+        cyan.set_sensitive(False)
+        cyan.show()
+
         separator = Gtk.SeparatorToolItem()
-        separator.props.draw = True
+        separator.props.draw = False
         toolbox.toolbar.insert(separator, -1)
         separator.show()
 
