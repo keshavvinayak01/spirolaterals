@@ -70,7 +70,7 @@ class Spirolaterals:
                 else:
                     utils.display_score()
             utils.display_number1(g.pattern, (g.sx(2.4), g.sy(2)),
-                                  g.font1, utils.BLUE)
+                                  g.font1, utils.WHITE)
 
     def set_cyan_button(self, cyan):
         self.cyan_button = cyan
