@@ -192,11 +192,11 @@ def init():  # called by main()
         img = utils.load_image(str(i + 1) + 'g.png', True)
         n_glow.append(img)
     if w > h:
-        n_cx0 = sx(17.2) + n[3].get_width() / 2  # "4" is widest
+        n_cx0 = sx(16.8) + n[3].get_width() / 2  # "4" is widest
         n_cy0 = sy(17)
         n_dx = sy(2.7)
     else:
-        n_cx0 = sx(2.6) + n[3].get_width() / 2  # "4" is widest
+        n_cx0 = sx(2.2) + n[3].get_width() / 2  # "4" is widest
         n_cy0 = sy(34)
         n_dx = sy(2.6)
 

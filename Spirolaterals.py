@@ -58,11 +58,10 @@ class Spirolaterals:
                         path = self.parent.good_job_image_path()
                         self.good_job = utils.load_image(path, True)
                     if g.w > g.h:
-                        utils.centre_blit(g.screen, self.good_job, (g.sx(0),
-                                                                    g.sy(17)))
+                        utils.centre_blit(g.screen, self.good_job, (g.sx(7),                                                                                               g.sy(17)))
                     else:
-                        utils.centre_blit(g.screen, self.good_job, (g.sx(0),
-                                                                    g.sy(34)))
+                        utils.centre_blit(g.screen, self.good_job, (g.sx(7),
+                                                                    g.sy(38)))
                 else:
                     utils.centre_blit(g.screen, g.smiley, (g.sx(16.6),
                                                            g.sy(2.2)))

@@ -59,17 +59,19 @@ class PeterActivity(activity.Activity):
         toolbox.toolbar.insert(activity_button, 0)
         activity_button.show()
 
-        separator = Gtk.SeparatorToolItem()
-        separator.props.draw = False
-        toolbox.toolbar.insert(separator, -1)
-        separator.show()
+        self.separator0 = Gtk.SeparatorToolItem()
+        self.separator0.props.draw = False
+        if Gdk.Screen.width() > 1023:
+            toolbox.toolbar.insert(self.separator0, -1)
+        self.separator0.show()
 
         self._add_speed_slider(toolbox.toolbar)
 
-        separator = Gtk.SeparatorToolItem()
-        separator.props.draw = False
-        toolbox.toolbar.insert(separator, -1)
-        separator.show()
+        self.separator1 = Gtk.SeparatorToolItem()
+        self.separator1.props.draw = False
+        if Gdk.Screen.width() > 1023:
+            toolbox.toolbar.insert(self.separator1, -1)
+        self.separator1.show()
 
         green = ToolButton('green')
         toolbox.toolbar.insert(green, -1)
@@ -90,10 +92,11 @@ class PeterActivity(activity.Activity):
         cyan.set_sensitive(False)
         cyan.show()
 
-        separator = Gtk.SeparatorToolItem()
-        separator.props.draw = False
-        toolbox.toolbar.insert(separator, -1)
-        separator.show()
+        self.separator2 = Gtk.SeparatorToolItem()
+        self.separator2.props.draw = False
+        if Gdk.Screen.width() > 1023:
+            toolbox.toolbar.insert(self.separator2, -1)
+        self.separator2.show()
 
         self._score_image = Gtk.Image()
         item = Gtk.ToolItem()
@@ -115,6 +118,8 @@ class PeterActivity(activity.Activity):
         toolbox.show()
         self.set_toolbar_box(toolbox)
 
+        self._toolbar = toolbox.toolbar
+
         # Create the game instance.
         self.game = Spirolaterals.Spirolaterals(colors, parent=self)
 
@@ -134,6 +139,16 @@ class PeterActivity(activity.Activity):
 
     def __configure_cb(self, event):
         ''' Screen size has changed '''
+        if Gdk.Screen.width() < 1024 and \
+                self.separator1 in self._toolbar:
+            self._toolbar.remove(self.separator0)
+            self._toolbar.remove(self.separator1)
+            self._toolbar.remove(self.separator2)
+        elif self.separator1 not in self._toolbar:
+            self._toolbar.insert(self.separator0, 1)
+            self._toolbar.insert(self.separator1, 5)
+            self._toolbar.insert(self.separator2, 9)
+
         logging.debug(self._pygamecanvas.get_allocation())
         pygame.display.set_mode((Gdk.Screen.width(),
                                  Gdk.Screen.height() - GRID_CELL_SIZE),
