@@ -95,14 +95,13 @@ class Spirolaterals:
 
         self.width = Gdk.Screen.width()
         self.height = Gdk.Screen.height() - style.GRID_CELL_SIZE
+        # TODO: SET SCALE
+        self.scale = 1.0
 
         if self.width < self.height:
             self.i = 1
         else:
             self.i = 0
-
-        # TODO: SET SCALE
-        self.scale = 1.0
 
         self.offset = 0
         self.offset = (self.width - 
@@ -117,13 +116,58 @@ class Spirolaterals:
 
         self._set_color(colors[0])
         self._set_pen_size(4)
+        self.reset_level()
 
-        self._show_user_numbers()
+
+    def reset_level(self):
+        self.width = Gdk.Screen.width()
+        self.height = Gdk.Screen.height() - style.GRID_CELL_SIZE
+        if self.width < self.height:
+            self.i = 1
+        else:
+            self.i = 0
+
+        self.offset = 0
+        self.offset = (self.width - 
+                       (self.sx(X1[self.i] + X2[self.i]) +
+                        self.ss(BS[self.i]))) / 2.
+
+        # TODO: SET SCALE
+        self.scale = 1.0
+
         self._show_background_graphics()
-        # TODO: Add turtle graphics
+        self._show_user_numbers()
         self.get_goal()
         self.draw_goal()
+
+        self._reset_sprites()
+
         self.inval_all()
+        
+        if self.score > 0:
+            self.parent.update_score(int(self.score))
+
+    def _reset_sprites(self):
+        x = self.sx(TX[self.i] - TS[self.i] / 2)
+        y = self.sy(TY[self.i])
+        self.target_turtle.move((x, y))
+
+        x = self.sx(UX[self.i] - US[self.i] / 2)
+        y = self.sy(UY[self.i])
+        self.user_turtles[0].move((x, y))
+
+        for i in range(5):
+            for j in range(5):
+                if self.i == 0:
+                    x = self.sx(NX[self.i]) + i * (self.ss(NS[self.i]
+                                                           + NO[self.i]))
+                    y = self.sy(NY[self.i])
+                else:
+                    x = self.sy(NX[self.i])
+                    y = self.sx(NY[self.i]) + i * (self.ss(NS[self.i]
+                                                           + NO[self.i]))
+                self.numbers[i][j].move((x, y))
+                self.glownumbers[i][j].move((x, y))
 
     def _keypress_cb(self, area, event):
         ''' Keypress: moving the slides with the arrow keys '''
@@ -293,10 +337,6 @@ class Spirolaterals:
         self.numbers[4][self.user_numbers[4] - 1].set_layer(1)
 
     def _show_background_graphics(self):
-        if self.width < self.height:
-            self.i = 1
-        else:
-            self.i = 0
         size = max(self.width, self.height)
 
         self._draw_pixbuf(

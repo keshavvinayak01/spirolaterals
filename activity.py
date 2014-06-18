@@ -147,6 +147,15 @@ class PeterActivity(activity.Activity):
         logging.error(canvas)
         self.game = Spirolaterals.Spirolaterals(canvas, colors, parent=self)
 
+        if 'score' in self.metadata:
+            self.game.score = int(self.metadata['score'])
+            if 'level' in self.metadata:
+                self.game.pattern = int(self.metadata['level'])
+            if 'last' in self.metadata:
+                if self.metadata['last'] != 'None':
+                    self.game.last_pattern = int(self.metadata['last'])
+            self.game.reset_level()
+
         Gdk.Screen.get_default().connect('size-changed', self.__configure_cb)
 
     def __configure_cb(self, event):
@@ -161,23 +170,15 @@ class PeterActivity(activity.Activity):
             self._toolbar.insert(self.separator1, 5)
             self._toolbar.insert(self.separator2, 9)
 
-        # TODO: rearrange all the bits and pieces
+        self.game.reset_level()
 
-    '''
-    def read_file(self, file_path):
-        try:
-            f = open(file_path, 'r')
-        except Exception as e:
-            logging.debug('Error opening %s: %s' % (file_path, e))
-            return
-        load_save.load(f)
-        f.close()
+    def read_file(self, path):
+        pass
 
-    def write_file(self, file_path):
-        f = open(file_path, 'w')
-        load_save.save(f)
-        f.close()
-    '''
+    def write_file(self, path):
+        self.metadata['score'] = str(self.game.score)
+        self.metadata['level'] = str(self.game.pattern)
+        self.metadata['last'] = str(self.game.last_pattern)
 
     def _button_cb(self, button=None, color=None):
         self.game.do_button(color)
