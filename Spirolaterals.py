@@ -202,7 +202,7 @@ class Spirolaterals:
         self._success = Sprite(self.sprites, x, y,
                                self.parent.good_job_pixbuf())
         self._success.hide()
-        self._failure = Sprite(self.sprites, x, y, self.parent.turtle_pixbuf())
+        self._failure = Sprite(self.sprites, x, y, self.parent.splot_pixbuf())
         self._failure.hide()
 
     def _create_turtle_sprites(self):
@@ -221,6 +221,21 @@ class Spirolaterals:
         pixbuf = pixbuf.rotate_simple(270)
         self.user_turtles.append(Sprite(self.sprites, x, y, pixbuf))
         self._show_turtle(0)
+        self._splot = Sprite(self.sprites, 0, 0, self.parent.splot_pixbuf())
+        self._splot.hide()
+
+    def _show_splot(self, x, y, dd, h):
+        for i in range(4):
+            self.user_turtles[i].hide()
+        if h == 0:
+            self._splot.move((x - int(dd / 2), y))
+        elif h == 1:
+            self._splot.move((x - dd, y - int(dd / 2)))
+        elif h == 2:
+            self._splot.move((x - int(dd / 2), y - dd))
+        elif h == 3:
+            self._splot.move((x, y - int(dd / 2)))
+        self._splot.set_layer(3)
 
     def _show_turtle(self, t):
         for i in range(4):
@@ -347,9 +362,6 @@ class Spirolaterals:
         PangoCairo.show_layout(cr, pl)
         cr.restore()
 
-    def sharing(self):
-        return False
-
     def inval_all(self):
         ''' Force a refresh '''
         # TODO: Window inval
@@ -369,6 +381,7 @@ class Spirolaterals:
         # TODO: Add turtle graphics
         self._success.hide()
         self._failure.hide()
+        self._splot.hide()
         self.get_goal()
         self.draw_goal()
         self.inval_all()
@@ -411,7 +424,13 @@ class Spirolaterals:
             self.user_turtles[h].move((int(x2 - dd), int(y2 - dd / 2)))
         self._show_turtle(h)
 
-        # TODO: Bounds check
+        if x2 < self.sx(X2[self.i]) or \
+           x2 > self.sx(X2[self.i] + BS[self.i]) or \
+           y2 < self.sy(Y2[self.i]) or \
+           y2 > self.sy(Y2[self.i] + BS[self.i]):
+            self.do_stop()
+            self._show_splot(x2, y2, dd, h)
+
         self._draw_line(x1, y1, x2, y2)
         self.inval_all()
         self.step += 1
@@ -469,6 +488,7 @@ class Spirolaterals:
         if bu == 'cyan':  # Next level
             self._success.hide()
             self._failure.hide()
+            self._splot.hide()
             self.pattern += 1
             if self.pattern == 123:
                 self.pattern = 1
@@ -484,40 +504,6 @@ class Spirolaterals:
             self.do_run()
         elif bu == 'red':  # Stop level
             self.do_stop()
-
-    def do_key(self, key):
-        if key in self.CROSS and not self.sugar:
-            if utils.mouse_on_img1(self.magician, self.magician_c):
-                self.help2()
-                return
-            bu = buttons.check()
-            if bu != '':
-                self.do_button(bu)
-                return
-            self.show_help = False
-            self.check_nos(1)
-            return
-        if key in self.CIRCLE:
-            self.check_nos(3)
-            return
-        if key in self.RIGHT:
-            self.mouse_right()
-            return
-        if key in self.LEFT:
-            self.mouse_left()
-            return
-        if key in self.SQUARE:
-            if self.sugar and self.cyan_button.get_sensitive():
-                self.do_button('cyan')
-            if not self.sugar and buttons.active('cyan'):
-                self.do_button('cyan')
-            return
-        if key in self.TICK:
-            self.change_level()
-            return
-        if key == pygame.K_v:
-            self.version_display = not self.version_display
-            return
 
     def draw_goal(self):  # draws the left hand pattern
         x1 = self.sx(TX[self.i])
@@ -566,18 +552,3 @@ class Spirolaterals:
         l = [int(c) for c in str(s)]
         self.goal = l
         self.steps = self.calc_steps(l)
-
-    def solution(self):
-        s = ''
-        for i in range(5):
-            s += str(self.goal[i]) + ' '
-        s = s[:9]
-        return s
-
-    def save_pattern(self):
-        logging.debug('save pattern %d' % (self.pattern))
-        self.pattern = self.pattern
-
-    def restore_pattern(self):
-        self.pattern = self.pattern
-        logging.debug('restore pattern %d' % (self.pattern))
