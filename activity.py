@@ -235,15 +235,8 @@ class PeterActivity(activity.Activity):
         self._score_image.set_from_pixbuf(pixbuf)
         self._score_image.show()
 
-    def good_job_image_path(self):
-        pixbuf = _svg_str_to_pixbuf(_good_job_icon(self.sugarcolors[0]))
-        path = os.path.join(activity.get_activity_root(), 'tmp',
-                            'good-job.png')
-        pixbuf.savev(path, 'png', [], [])
-        return path
-
-    def good_job_pixbuf(self, color):
-        return _svg_str_to_pixbuf(_good_job_icon(color))
+    def good_job_pixbuf(self):
+        return _svg_str_to_pixbuf(_good_job_icon(self.sugarcolors[0]))
 
     def background_pixbuf(self):
         size = max(Gdk.Screen.width(), Gdk.Screen.height())

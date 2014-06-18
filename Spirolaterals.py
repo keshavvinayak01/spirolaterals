@@ -28,10 +28,11 @@ from sugar3.graphics import style
 
 from sprites import Sprites, Sprite
 
-BS = [400, 400]
-X1 = [25, 25]
+# artwork positions/scale in [landscape, portrait]
+BS = [400, 400]  # box scale
+X1 = [25, 25]  # left/top box position
 Y1 = [25, 25]
-X2 = [475, 25]
+X2 = [475, 25]  # right/bottom box position
 Y2 = [25, 475]
 NX = [475, 475]
 NY = [475, 475]
@@ -60,6 +61,7 @@ class Spirolaterals:
         self.journal = True  # set to False if we come in via main()
         self.cyan_button = None
         self.pattern = 1
+        self.last_pattern = None
         self.turtle_canvas = None
         self.user_numbers = [1, 1, 1, 3, 2]
         self.active_index = 0
@@ -111,6 +113,7 @@ class Spirolaterals:
         self.glownumbers = []
         self._create_number_sprites()
         self._create_turtle_sprites()
+        self._create_results_sprites()
 
         self._set_color(colors[0])
         self._set_pen_size(4)
@@ -124,21 +127,50 @@ class Spirolaterals:
 
     def _keypress_cb(self, area, event):
         ''' Keypress: moving the slides with the arrow keys '''
+
         k = Gdk.keyval_name(event.keyval)
         if k in ['1', '2', '3', '4', '5']:
             self.do_stop()
             i = self.active_index
             j = int(k) - 1
-            print k, i, j
             self.numbers[i][self.user_numbers[i] - 1].set_layer(0)
             self.numbers[i][j].set_layer(1)
             self.user_numbers[i] = j + 1
             self.inval_all()
+        elif k in ['KP_Up', 'j', 'Up']:
+            self.do_stop()
+            i = self.active_index
+            j = self.user_numbers[i]
+            if j < 5:
+                j += 1
+            self.numbers[i][self.user_numbers[i] - 1].set_layer(0)
+            self.numbers[i][j - 1].set_layer(1)
+            self.user_numbers[i] = j
+            self.inval_all()
+        elif k in ['KP_Down', 'k', 'Down']:
+            self.do_stop()
+            i = self.active_index
+            j = self.user_numbers[i]
+            if j > 0:
+                j -= 1
+            self.numbers[i][self.user_numbers[i] - 1].set_layer(0)
+            self.numbers[i][j - 1].set_layer(1)
+            self.user_numbers[i] = j
+            self.inval_all()
+        elif k in ['KP_Left', 'h', 'Left']:
+            self.do_stop()
+            self.active_index -= 1
+            self.active_index %= 5
+        elif k in ['KP_Right', 'l', 'Right']:
+            self.do_stop()
+            self.active_index += 1
+            self.active_index %= 5
         elif k in ['Return']:
             self.do_run()
-        elif k in ['Space', ' ']:
+        elif k in ['space', 'Esc']:
             self.do_stop()
-        # TODO: Add arrow keys, buttons, Return, +, -...
+        else:
+            logging.debug(k)
 
     def _mouse_move_cb(self, win, event):
         ''' Callback to handle the mouse moves '''
@@ -163,6 +195,15 @@ class Spirolaterals:
             self.numbers[i][j].set_layer(0)
             self.user_numbers[i] = j1 + 1
             self.inval_all()
+
+    def _create_results_sprites(self):
+        x = 0
+        y = self.sy(GY[self.i])
+        self._success = Sprite(self.sprites, x, y,
+                               self.parent.good_job_pixbuf())
+        self._success.hide()
+        self._failure = Sprite(self.sprites, x, y, self.parent.turtle_pixbuf())
+        self._failure.hide()
 
     def _create_turtle_sprites(self):
         x = self.sx(TX[self.i] - TS[self.i] / 2)
@@ -326,6 +367,8 @@ class Spirolaterals:
     def do_run(self):
         self._show_background_graphics()
         # TODO: Add turtle graphics
+        self._success.hide()
+        self._failure.hide()
         self.get_goal()
         self.draw_goal()
         self.inval_all()
@@ -401,17 +444,21 @@ class Spirolaterals:
                 success = False
                 break
         if success:
-            self._success()
+            self._do_success()
         else:
-            self._fail()
+            self._do_fail()
 
-    def _success(self):
+    def _do_success(self):
         logging.debug('success... you can advance to the next level')
+        self._success.set_layer(3)
         self.parent.cyan.set_sensitive(True)
-        self.score += 6
+        if self.last_pattern != self.pattern:
+            self.score += 6
+            self.last_pattern = self.pattern
         self.parent.update_score(int(self.score))
 
-    def _fail(self):
+    def _do_fail(self):
+        self._failure.set_layer(3)
         logging.debug('fail... try again')
         self.parent.cyan.set_sensitive(False)
 
@@ -420,6 +467,8 @@ class Spirolaterals:
 
     def do_button(self, bu):
         if bu == 'cyan':  # Next level
+            self._success.hide()
+            self._failure.hide()
             self.pattern += 1
             if self.pattern == 123:
                 self.pattern = 1
