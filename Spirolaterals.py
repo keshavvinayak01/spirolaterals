@@ -48,14 +48,13 @@ LS = [24, 24]
 
 class Spirolaterals:
 
-    def __init__(self, canvas, colors, parent=None, sugar=True):
+    def __init__(self, canvas, colors, parent=None, defer=False):
         self.canvas = canvas
         self.colors = colors
         self.parent = parent
         self.good_job = None
         self.delay = 500
         self.score = 0
-        self.sugar = sugar
         self.journal = True  # set to False if we come in via main()
         self.cyan_button = None
         self.pattern = 1
@@ -109,7 +108,9 @@ class Spirolaterals:
 
         self._set_color(colors[0])
         self._set_pen_size(4)
-        self.reset_level()
+
+        if not defer:
+            self.reset_level()
 
     def _calculate_scale_and_offset(self):
         self.offset = 0
@@ -349,7 +350,7 @@ class Spirolaterals:
             self.sx(X1[self.i]), self.sy(Y1[self.i]), self.ss(BS[self.i]),
             self.ss(BS[self.i]))
         self._draw_pixbuf(
-            self.cr, self.parent.box_pixbuf(self.sx(BS[self.i])),
+            self.cr, self.parent.box_pixbuf(self.ss(BS[self.i])),
             self.sx(X2[self.i]), self.sy(Y2[self.i]), self.ss(BS[self.i]),
             self.ss(BS[self.i]))
         self._draw_text(self.cr, self.pattern, self.sx(X1[self.i]),
