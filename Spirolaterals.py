@@ -41,10 +41,10 @@ NO = [7, 7]
 TX = [200, 225]
 TY = [350, 350]
 TS = [50, 50]
-UX = [650, 475]
-UY = [350, 850]
+UX = [650, 225]
+UY = [350, 775]
 US = [50, 50]
-GY = [500, 1000]
+GY = [600, 950]
 LS = [24, 24]
 
 
@@ -95,18 +95,13 @@ class Spirolaterals:
 
         self.width = Gdk.Screen.width()
         self.height = Gdk.Screen.height() - style.GRID_CELL_SIZE
-        # TODO: SET SCALE
-        self.scale = 1.0
 
         if self.width < self.height:
             self.i = 1
         else:
             self.i = 0
 
-        self.offset = 0
-        self.offset = (self.width - 
-                       (self.sx(X1[self.i] + X2[self.i]) +
-                        self.ss(BS[self.i]))) / 2.
+        self._calculate_scale_and_offset()
 
         self.numbers = []
         self.glownumbers = []
@@ -118,6 +113,18 @@ class Spirolaterals:
         self._set_pen_size(4)
         self.reset_level()
 
+    def _calculate_scale_and_offset(self):
+        self.offset = 0
+        if self.i == 0:
+            self.scale = self.height / (900. - style.GRID_CELL_SIZE)
+            self.offset = (self.width - 
+                           (self.sx(X1[self.i] + X2[self.i]) +
+                            self.ss(BS[self.i]))) / 2.
+        else:
+            self.scale = self.width / 1200.
+            self.offset = (self.width - 
+                           (self.sx(X1[self.i]) +
+                            self.ss(BS[self.i]))) / 2.
 
     def reset_level(self):
         self.width = Gdk.Screen.width()
@@ -127,13 +134,7 @@ class Spirolaterals:
         else:
             self.i = 0
 
-        self.offset = 0
-        self.offset = (self.width - 
-                       (self.sx(X1[self.i] + X2[self.i]) +
-                        self.ss(BS[self.i]))) / 2.
-
-        # TODO: SET SCALE
-        self.scale = 1.0
+        self._calculate_scale_and_offset()
 
         self._show_background_graphics()
         self._show_user_numbers()
@@ -163,8 +164,8 @@ class Spirolaterals:
                                                            + NO[self.i]))
                     y = self.sy(NY[self.i])
                 else:
-                    x = self.sy(NX[self.i])
-                    y = self.sx(NY[self.i]) + i * (self.ss(NS[self.i]
+                    x = self.sx(NX[self.i])
+                    y = self.sy(NY[self.i]) + i * (self.ss(NS[self.i]
                                                            + NO[self.i]))
                 self.numbers[i][j].move((x, y))
                 self.glownumbers[i][j].move((x, y))
@@ -209,9 +210,9 @@ class Spirolaterals:
             self.do_stop()
             self.active_index += 1
             self.active_index %= 5
-        elif k in ['Return']:
+        elif k in ['Return', 'KP_Page_Up', 'KP_End']:
             self.do_run()
-        elif k in ['space', 'Esc']:
+        elif k in ['space', 'Esc', 'KP_Page_Down', 'KP_Home']:
             self.do_stop()
         else:
             logging.debug(k)
@@ -304,8 +305,8 @@ class Spirolaterals:
                                                            + NO[self.i]))
                     y = self.sy(NY[self.i])
                 else:
-                    x = self.sy(NX[self.i])
-                    y = self.sx(NY[self.i]) + i * (self.ss(NS[self.i]
+                    x = self.sx(NX[self.i])
+                    y = self.sy(NY[self.i]) + i * (self.ss(NS[self.i]
                                                            + NO[self.i]))
                 number = Sprite(
                     self.sprites, x, y,
@@ -337,10 +338,9 @@ class Spirolaterals:
         self.numbers[4][self.user_numbers[4] - 1].set_layer(1)
 
     def _show_background_graphics(self):
-        size = max(self.width, self.height)
-
         self._draw_pixbuf(
-            self.cr, self.parent.background_pixbuf(), 0, 0, size, size)
+            self.cr, self.parent.background_pixbuf(), 0, 0,
+            self.width, self.height)
         self._draw_pixbuf(
             self.cr, self.parent.box_pixbuf(self.ss(BS[self.i])),
             self.sx(X1[self.i]), self.sy(Y1[self.i]), self.ss(BS[self.i]),

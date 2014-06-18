@@ -302,7 +302,7 @@ def _good_job_icon(color):
             'xmlns:svg="http://www.w3.org/2000/svg"\n' + \
             'xmlns="http://www.w3.org/2000/svg"\n' + \
             'version="1.1"\n' + \
-            'width="700"\n' + \
+            'width="900"\n' + \
             'height="150">\n' + \
             '<g\n' + \
             'transform="translate(-322.5,-409.12501)">\n' + \
