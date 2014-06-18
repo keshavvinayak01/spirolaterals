@@ -14,11 +14,9 @@
 
 """
 import os
-import sys
 import cairo
 import logging
 
-from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
 from gi.repository import Pango
@@ -117,12 +115,12 @@ class Spirolaterals:
         self.offset = 0
         if self.i == 0:
             self.scale = self.height / (900. - style.GRID_CELL_SIZE)
-            self.offset = (self.width - 
+            self.offset = (self.width -
                            (self.sx(X1[self.i] + X2[self.i]) +
                             self.ss(BS[self.i]))) / 2.
         else:
-            self.scale = self.width / 1200.
-            self.offset = (self.width - 
+            self.scale = self.width / 900.
+            self.offset = (self.width -
                            (self.sx(X1[self.i]) +
                             self.ss(BS[self.i]))) / 2.
 
@@ -144,7 +142,7 @@ class Spirolaterals:
         self._reset_sprites()
 
         self.inval_all()
-        
+
         if self.score > 0:
             self.parent.update_score(int(self.score))
 
@@ -169,6 +167,10 @@ class Spirolaterals:
                                                            + NO[self.i]))
                 self.numbers[i][j].move((x, y))
                 self.glownumbers[i][j].move((x, y))
+
+        self._success.hide()
+        self._failure.hide()
+        self._splot.hide()
 
     def _keypress_cb(self, area, event):
         ''' Keypress: moving the slides with the arrow keys '''
@@ -216,6 +218,7 @@ class Spirolaterals:
             self.do_stop()
         else:
             logging.debug(k)
+        self.canvas.grab_focus()
 
     def _mouse_move_cb(self, win, event):
         ''' Callback to handle the mouse moves '''
