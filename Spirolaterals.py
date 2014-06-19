@@ -48,15 +48,15 @@ LS = [24, 24]  # font size for level indicator
 
 class Spirolaterals:
 
-    def __init__(self, canvas, colors, parent=None, defer=False):
+    def __init__(self, canvas, colors, parent, score=0, delay=500, pattern=1,
+                 last=None):
         self._canvas = canvas
         self._colors = colors
         self._parent = parent
-
-        self.delay = 500
-        self.score = 0
-        self.pattern = 1
-        self.last_pattern = None
+        self.delay = delay
+        self.score = score
+        self.pattern = pattern
+        self.last_pattern = last
 
         self._turtle_canvas = None
         self._user_numbers = [1, 1, 1, 3, 2]
@@ -103,13 +103,12 @@ class Spirolaterals:
         self._set_color(colors[0])
         self._set_pen_size(4)
 
-        if not defer:
-            self.reset_level()
+        self.reset_level()
 
     def _calculate_scale_and_offset(self):
         self.offset = 0
         if self.i == 0:
-            self.scale = self._height / (900. - style.GRID_CELL_SIZE) * 1.33
+            self.scale = self._height / (900. - style.GRID_CELL_SIZE) * 1.25
             self.offset = (self._width -
                            (self.sx(X1[self.i] + X2[self.i]) +
                             self.ss(BS[self.i]))) / 2.
@@ -136,8 +135,6 @@ class Spirolaterals:
         self._draw_goal()
 
         self._reset_sprites()
-
-        self.inval_all()
 
         if self.score > 0:
             self._parent.update_score(int(self.score))
@@ -182,7 +179,7 @@ class Spirolaterals:
             self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
             self._numbers[i][j].set_layer(1)
             self._user_numbers[i] = j + 1
-            self.inval_all()
+            self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Up', 'j', 'Up']:
             self.do_stop()
             i = self._active_index
@@ -192,7 +189,7 @@ class Spirolaterals:
             self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
             self._numbers[i][j - 1].set_layer(1)
             self._user_numbers[i] = j
-            self.inval_all()
+            self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Down', 'k', 'Down']:
             self.do_stop()
             i = self._active_index
@@ -202,7 +199,7 @@ class Spirolaterals:
             self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
             self._numbers[i][j - 1].set_layer(1)
             self._user_numbers[i] = j
-            self.inval_all()
+            self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Left', 'h', 'Left']:
             self.do_stop()
             self._active_index -= 1
@@ -234,7 +231,7 @@ class Spirolaterals:
             self._numbers[i][j1].set_layer(1)
             self._numbers[i][j].set_layer(0)
             self._user_numbers[i] = j1 + 1
-            self.inval_all()
+            self.inval(self._numbers[i][j].rect)
 
     def _create_results_sprites(self):
         x = 0
@@ -397,9 +394,11 @@ class Spirolaterals:
         PangoCairo.show_layout(self._cr, pl)
         self._cr.restore()
 
+    def inval(self, r):
+        self._canvas.queue_draw_area(r[0], r[1], r[2], r[3])
+
     def inval_all(self):
         ''' Force a refresh '''
-        # TODO: Window inval
         self._canvas.queue_draw_area(0, 0, self._width, self._height)
 
     def __draw_cb(self, canvas, cr):

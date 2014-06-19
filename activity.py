@@ -62,6 +62,24 @@ class PeterActivity(activity.Activity):
                    int(self.sugarcolors[1][3:5], 16),
                    int(self.sugarcolors[1][5:7], 16)]]
 
+        # Read any metadata from previous sessions
+        if 'score' in self.metadata:
+            score = int(self.metadata['score'])
+        else:
+            score = 0
+        if 'level' in self.metadata:
+            pattern = int(self.metadata['level'])
+        else:
+            pattern = 1
+        if 'last' in self.metadata and self.metadata['last'] != 'None':
+            last = int(self.metadata['last'])
+        else:
+            last = None
+        if 'delay' in self.metadata:
+            delay = int(self.metadata['delay'])
+        else:
+            delay = 500
+
         # No sharing
         self.max_participants = 1
 
@@ -78,7 +96,7 @@ class PeterActivity(activity.Activity):
             toolbox.toolbar.insert(self._separator0, -1)
         self._separator0.show()
 
-        self._add_speed_slider(toolbox.toolbar)
+        self._add_speed_slider(toolbox.toolbar, delay)
 
         self._separator1 = Gtk.SeparatorToolItem()
         self._separator1.props.draw = False
@@ -141,23 +159,21 @@ class PeterActivity(activity.Activity):
         canvas.show()
         self.show_all()
 
-        # Initialize the canvas
-        self._game = Spirolaterals.Spirolaterals(
-            canvas, colors, parent=self, defer='score' in self.metadata)
+        self._landscape = Gdk.Screen.width() > Gdk.Screen.height()
 
-        if 'score' in self.metadata:
-            self._game.score = int(self.metadata['score'])
-            if 'level' in self.metadata:
-                self._game.pattern = int(self.metadata['level'])
-            if 'last' in self.metadata:
-                if self.metadata['last'] != 'None':
-                    self._game.last_pattern = int(self.metadata['last'])
-            self._game.reset_level()
+        self._game = Spirolaterals.Spirolaterals(
+            canvas, colors, self, score=score, pattern=pattern, last=last,
+            delay=delay)
 
         Gdk.Screen.get_default().connect('size-changed', self.__configure_cb)
 
     def __configure_cb(self, event):
-        ''' Screen size has changed '''
+        ''' Screen size/orientation has changed '''
+
+        # We only redraw if orientation has changed.
+        if self._landscape == Gdk.Screen.width() > Gdk.Screen.height():
+            return
+
         if Gdk.Screen.width() < 1024 and \
                 self._separator1 in self._toolbar:
             self._toolbar.remove(self._separator0)
@@ -177,11 +193,12 @@ class PeterActivity(activity.Activity):
         self.metadata['score'] = str(self._game.score)
         self.metadata['level'] = str(self._game.pattern)
         self.metadata['last'] = str(self._game.last_pattern)
+        self.metadata['delay'] = str(self._game.delay)
 
     def _button_cb(self, button=None, color=None):
         self._game.do_button(color)
 
-    def _add_speed_slider(self, toolbar):
+    def _add_speed_slider(self, toolbar, delay):
         self._speed_stepper_down = ToolButton('speed-down')
         self._speed_stepper_down.set_tooltip(_('Slow down'))
         self._speed_stepper_down.connect('clicked',
@@ -189,7 +206,7 @@ class PeterActivity(activity.Activity):
         self._speed_stepper_down.show()
 
         self._adjustment = Gtk.Adjustment.new(
-            500, self._LOWER, self._UPPER, 25, 100, 0)
+            delay, self._LOWER, self._UPPER, 25, 100, 0)
         self._adjustment.connect('value_changed', self._speed_change_cb)
         self._speed_range = Gtk.HScale.new(self._adjustment)
         self._speed_range.set_inverted(True)
