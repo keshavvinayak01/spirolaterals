@@ -42,7 +42,7 @@ TS = [50, 50]
 UX = [650, 225]
 UY = [350, 775]
 US = [50, 50]
-GY = [600, 950]
+GY = [500, 950]
 LS = [24, 24]
 
 
@@ -115,7 +115,7 @@ class Spirolaterals:
     def _calculate_scale_and_offset(self):
         self.offset = 0
         if self.i == 0:
-            self.scale = self.height / (900. - style.GRID_CELL_SIZE)
+            self.scale = self.height / (900. - style.GRID_CELL_SIZE) * 1.33
             self.offset = (self.width -
                            (self.sx(X1[self.i] + X2[self.i]) +
                             self.ss(BS[self.i]))) / 2.
@@ -513,8 +513,7 @@ class Spirolaterals:
             self._do_fail()
 
     def _do_success(self):
-        logging.debug('success... you can advance to the next level')
-        self._success.set_layer(3)
+        self._success.set_layer(5)
         self.parent.cyan.set_sensitive(True)
         if self.last_pattern != self.pattern:
             self.score += 6
@@ -522,8 +521,7 @@ class Spirolaterals:
         self.parent.update_score(int(self.score))
 
     def _do_fail(self):
-        self._failure.set_layer(3)
-        logging.debug('fail... try again')
+        self._failure.set_layer(5)
         self.parent.cyan.set_sensitive(False)
 
     def do_slider(self, value):
