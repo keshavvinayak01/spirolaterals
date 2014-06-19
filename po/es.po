@@ -52,3 +52,7 @@ msgstr ""
 #: activity.py:371
 msgid "Good job!"
 msgstr "¡Buen trabajo!"
+
+#: activity.py:515
+msgid "Try again."
+msgstr "Inténtelo de nuevo."
