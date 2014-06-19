@@ -37,7 +37,7 @@ def _luminance(color):
         int(color[5:7], 16) * 0.1
 
 
-def lighter_color(colors):
+def _lighter_color(colors):
     ''' Which color is lighter? Use that one for the text nick color '''
     if _luminance(colors[0]) > _luminance(colors[1]):
         return 0
@@ -45,15 +45,15 @@ def lighter_color(colors):
 
 
 class PeterActivity(activity.Activity):
-    LOWER = 0
-    UPPER = 1000
+    _LOWER = 0
+    _UPPER = 1000
 
     def __init__(self, handle):
         super(PeterActivity, self).__init__(handle)
 
         # Get user's Sugar colors
         sugarcolors = profile.get_color().to_string().split(',')
-        i = lighter_color(sugarcolors)
+        i = _lighter_color(sugarcolors)
         self.sugarcolors = [sugarcolors[i], sugarcolors[1 - i]]
         colors = [[int(self.sugarcolors[0][1:3], 16),
                    int(self.sugarcolors[0][3:5], 16),
@@ -72,19 +72,19 @@ class PeterActivity(activity.Activity):
         toolbox.toolbar.insert(activity_button, 0)
         activity_button.show()
 
-        self.separator0 = Gtk.SeparatorToolItem()
-        self.separator0.props.draw = False
+        self._separator0 = Gtk.SeparatorToolItem()
+        self._separator0.props.draw = False
         if Gdk.Screen.width() > 1023:
-            toolbox.toolbar.insert(self.separator0, -1)
-        self.separator0.show()
+            toolbox.toolbar.insert(self._separator0, -1)
+        self._separator0.show()
 
         self._add_speed_slider(toolbox.toolbar)
 
-        self.separator1 = Gtk.SeparatorToolItem()
-        self.separator1.props.draw = False
+        self._separator1 = Gtk.SeparatorToolItem()
+        self._separator1.props.draw = False
         if Gdk.Screen.width() > 1023:
-            toolbox.toolbar.insert(self.separator1, -1)
-        self.separator1.show()
+            toolbox.toolbar.insert(self._separator1, -1)
+        self._separator1.show()
 
         green = ToolButton('green')
         toolbox.toolbar.insert(green, -1)
@@ -105,11 +105,11 @@ class PeterActivity(activity.Activity):
         self.cyan.set_sensitive(False)
         self.cyan.show()
 
-        self.separator2 = Gtk.SeparatorToolItem()
-        self.separator2.props.draw = False
+        self._separator2 = Gtk.SeparatorToolItem()
+        self._separator2.props.draw = False
         if Gdk.Screen.width() > 1023:
-            toolbox.toolbar.insert(self.separator2, -1)
-        self.separator2.show()
+            toolbox.toolbar.insert(self._separator2, -1)
+        self._separator2.show()
 
         self._score_image = Gtk.Image()
         item = Gtk.ToolItem()
@@ -142,44 +142,44 @@ class PeterActivity(activity.Activity):
         self.show_all()
 
         # Initialize the canvas
-        self.game = Spirolaterals.Spirolaterals(canvas, colors, parent=self,
-                                                defer='score' in self.metadata)
+        self._game = Spirolaterals.Spirolaterals(
+            canvas, colors, parent=self, defer='score' in self.metadata)
 
         if 'score' in self.metadata:
-            self.game.score = int(self.metadata['score'])
+            self._game.score = int(self.metadata['score'])
             if 'level' in self.metadata:
-                self.game.pattern = int(self.metadata['level'])
+                self._game.pattern = int(self.metadata['level'])
             if 'last' in self.metadata:
                 if self.metadata['last'] != 'None':
-                    self.game.last_pattern = int(self.metadata['last'])
-            self.game.reset_level()
+                    self._game.last_pattern = int(self.metadata['last'])
+            self._game.reset_level()
 
         Gdk.Screen.get_default().connect('size-changed', self.__configure_cb)
 
     def __configure_cb(self, event):
         ''' Screen size has changed '''
         if Gdk.Screen.width() < 1024 and \
-                self.separator1 in self._toolbar:
-            self._toolbar.remove(self.separator0)
-            self._toolbar.remove(self.separator1)
-            self._toolbar.remove(self.separator2)
-        elif self.separator1 not in self._toolbar:
-            self._toolbar.insert(self.separator0, 1)
-            self._toolbar.insert(self.separator1, 5)
-            self._toolbar.insert(self.separator2, 9)
+                self._separator1 in self._toolbar:
+            self._toolbar.remove(self._separator0)
+            self._toolbar.remove(self._separator1)
+            self._toolbar.remove(self._separator2)
+        elif self._separator1 not in self._toolbar:
+            self._toolbar.insert(self._separator0, 1)
+            self._toolbar.insert(self._separator1, 5)
+            self._toolbar.insert(self._separator2, 9)
 
-        self.game.reset_level()
+        self._game.reset_level()
 
     def read_file(self, path):
         pass
 
     def write_file(self, path):
-        self.metadata['score'] = str(self.game.score)
-        self.metadata['level'] = str(self.game.pattern)
-        self.metadata['last'] = str(self.game.last_pattern)
+        self.metadata['score'] = str(self._game.score)
+        self.metadata['level'] = str(self._game.pattern)
+        self.metadata['last'] = str(self._game.last_pattern)
 
     def _button_cb(self, button=None, color=None):
-        self.game.do_button(color)
+        self._game.do_button(color)
 
     def _add_speed_slider(self, toolbar):
         self._speed_stepper_down = ToolButton('speed-down')
@@ -189,7 +189,7 @@ class PeterActivity(activity.Activity):
         self._speed_stepper_down.show()
 
         self._adjustment = Gtk.Adjustment.new(
-            500, self.LOWER, self.UPPER, 25, 100, 0)
+            500, self._LOWER, self._UPPER, 25, 100, 0)
         self._adjustment.connect('value_changed', self._speed_change_cb)
         self._speed_range = Gtk.HScale.new(self._adjustment)
         self._speed_range.set_inverted(True)
@@ -213,20 +213,20 @@ class PeterActivity(activity.Activity):
 
     def _speed_stepper_down_cb(self, button=None):
         new_value = self._speed_range.get_value() + 25
-        if new_value <= self.UPPER:
+        if new_value <= self._UPPER:
             self._speed_range.set_value(new_value)
         else:
-            self._speed_range.set_value(self.UPPER)
+            self._speed_range.set_value(self._UPPER)
 
     def _speed_stepper_up_cb(self, button=None):
         new_value = self._speed_range.get_value() - 25
-        if new_value >= self.LOWER:
+        if new_value >= self._LOWER:
             self._speed_range.set_value(new_value)
         else:
-            self._speed_range.set_value(self.LOWER)
+            self._speed_range.set_value(self._LOWER)
 
     def _speed_change_cb(self, button=None):
-        self.game.do_slider(int(self._adjustment.get_value()))
+        self._game.do_slider(int(self._adjustment.get_value()))
         return True
 
     def update_score(self, score):
