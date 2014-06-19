@@ -251,7 +251,8 @@ class Spirolaterals:
         self._success = Sprite(self.sprites, x, y,
                                self.parent.good_job_pixbuf())
         self._success.hide()
-        self._failure = Sprite(self.sprites, x, y, self.parent.splot_pixbuf())
+        self._failure = Sprite(self.sprites, x, y,
+                               self.parent.try_again_pixbuf())
         self._failure.hide()
 
     def _create_turtle_sprites(self):

@@ -237,6 +237,9 @@ class PeterActivity(activity.Activity):
     def good_job_pixbuf(self):
         return _svg_str_to_pixbuf(_good_job_icon(self.sugarcolors[0]))
 
+    def try_again_pixbuf(self):
+        return _svg_str_to_pixbuf(_try_again_icon(self.sugarcolors[0]))
+
     def background_pixbuf(self):
         size = max(Gdk.Screen.width(), Gdk.Screen.height())
         return _svg_str_to_pixbuf(_rect(size, size, 0, self.sugarcolors[1]))
@@ -451,6 +454,67 @@ def _rect(height, width, radius, color):
         'x="0"\n' + \
         'y="0"\n' + \
         'style="fill:%s;fill-opacity:1;stroke:none;" />\n' % color + \
+        '</svg>'
+
+
+def _try_again_icon(color):
+    return \
+        '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + \
+        '<svg\n' + \
+        'xmlns:dc="http://purl.org/dc/elements/1.1/"\n' + \
+        'xmlns:cc="http://creativecommons.org/ns#"\n' + \
+        'xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"\n' + \
+        'xmlns:svg="http://www.w3.org/2000/svg"\n' + \
+        'xmlns="http://www.w3.org/2000/svg"\n' + \
+        'version="1.1"\n' + \
+        'width="900"\n' + \
+        'height="150">\n' + \
+        '<g\n' + \
+        'transform="matrix(1,0,0,-1,-323.5,558.18595)"\n' + \
+        'style="stroke-width:3;stroke-miterlimit:4">\n' + \
+        '<path\n' + \
+        'd="m 325,470.5 197,1 0,68 -196.5,17 z"\n' + \
+        'style="fill:%s;fill-opacity:1;stroke:#ffffff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n' % color + \
+        '<path\n' + \
+        'd="m 523.58046,470.41954 c -0.13908,-5.26214 5.74754,-7.07818 9.44636,-9 8.61617,-4.24453 9.85572,-8.02297 12.47318,-16.41954 1.76159,-5.65019 1.81398,-11.70163 3,-17.5 0.72099,-3.52486 0.49972,-7.50946 2.5,-10.5 2.05742,-3.07595 5.4789,-5.36144 9,-6.5 2.6959,-0.87173 5.8359,-0.96454 8.5,0 2.44792,0.88627 4.49712,2.87417 6,5 2.77016,3.91842 4.78743,10.31663 4.20977,15.08046 -1.40645,11.59866 -4.33199,20.55541 -6.91954,29.18295 2.63914,4.35385 1.09045,0.91477 19.37546,1.70977 4.12891,2.16337 7.61581,4.72782 6.59773,10.23659 1.52418,5.05477 -3.98096,6.45467 -3.15615,9.34387 5.05679,2.02909 10.82214,5.37105 9.94637,10.26819 0.76071,9.82042 -3.39004,8.29484 -5.5,11.67817 1.54287,3.42335 2.23857,5.25348 2.91954,9.15614 0.89173,5.11047 -2.53079,8.96195 -9.55364,11.05363 -1.03862,3.55186 1.99938,6.55092 2.55364,10.20977 0.64307,4.24511 -1.56067,7.6627 -4.47318,9.08046 -25.61313,0.54849 -33.0002,0.80747 -57.5,0 -2.385,-0.0786 -3.62433,0.62247 -6.20977,-2.02682 -1.45872,-1.49473 -2.77989,-1.80492 -2.79023,-3.44636 z"\n' + \
+        'style="fill:%s;fill-opacity:1;stroke:#ffffff;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />\n' % color + \
+        '<rect\n' + \
+        'width="45"\n' + \
+        'height="20"\n' + \
+        'ry="10"\n' + \
+        'x="571.5"\n' + \
+        'y="461"\n' + \
+        'style="fill:%s;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />\n' % color + \
+        '<rect\n' + \
+        'width="57"\n' + \
+        'height="20"\n' + \
+        'ry="10"\n' + \
+        'x="566"\n' + \
+        'y="483"\n' + \
+        'style="fill:%s;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />\n' % color + \
+        '<rect\n' + \
+        'width="54.5"\n' + \
+        'height="20"\n' + \
+        'ry="10"\n' + \
+        'x="566.5"\n' + \
+        'y="502.5"\n' + \
+        'style="fill:%s;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />\n' % color + \
+        '<rect\n' + \
+        'width="40.5"\n' + \
+        'height="20"\n' + \
+        'ry="10"\n' + \
+        'x="574"\n' + \
+        'y="523"\n' + \
+        'style="fill:%s;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />\n' % color + \
+        '</g>\n' + \
+        '<text>\n' + \
+        '<tspan\n' + \
+        'x="315.5"\n' + \
+        'y="97.874992"\n' + \
+        'style="font-size:48px;text-align:start;text-anchor:start;fill:%s;fill-opacity:1">' % color + \
+        _('Try again.') + \
+        '</tspan>\n' + \
+        '</text>\n' + \
         '</svg>'
 
 
