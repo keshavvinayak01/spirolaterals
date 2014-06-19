@@ -161,7 +161,11 @@ class Spirolaterals:
                 self._numbers[i][j].move((x, y))
                 self._glownumbers[i][j].move((x, y))
 
+        x = 0
+        y = self.sy(GY[self.i])
+        self._success.move((x, y))
         self._success.hide()
+        self._failure.move((x, y))
         self._failure.hide()
         self._splot.hide()
 
