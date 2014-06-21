@@ -135,11 +135,11 @@ class PeterActivity(activity.Activity):
         toolbox.toolbar.insert(item, -1)
         item.show()
 
-        separator = Gtk.SeparatorToolItem()
-        separator.props.draw = False
-        separator.set_expand(True)
-        toolbox.toolbar.insert(separator, -1)
-        separator.show()
+        self.separator3 = Gtk.SeparatorToolItem()
+        self.separator3.props.draw = False
+        self.separator3.set_expand(True)
+        toolbox.toolbar.insert(self.separator3, -1)
+        self.separator3.show()
 
         stop_button = StopButton(self)
         stop_button.props.accelerator = _('<Ctrl>Q')
@@ -179,10 +179,12 @@ class PeterActivity(activity.Activity):
             self._toolbar.remove(self._separator0)
             self._toolbar.remove(self._separator1)
             self._toolbar.remove(self._separator2)
+            self.separator3.set_expand(False)
         elif self._separator1 not in self._toolbar:
             self._toolbar.insert(self._separator0, 1)
             self._toolbar.insert(self._separator1, 5)
             self._toolbar.insert(self._separator2, 9)
+            self.separator3.set_expand(True)
 
         self._game.reset_level()
 
