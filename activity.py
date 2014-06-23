@@ -366,7 +366,7 @@ def _good_job_icon(color):
         '<tspan\n' + \
         'x="315.5"\n' + \
         'y="97.874992"\n' + \
-        'style="font-size:48px;text-align:start;text-anchor:start;fill:%s;fill-opacity:1">' % color + \
+        'style="font-size:48px;text-align:start;text-anchor:start;fill:%s;fill-opacity:1;font-family:abc123">' % color + \
         _('Good job!') + \
         '</tspan>\n' + \
         '</text>\n' + \
@@ -413,7 +413,7 @@ def _score_icon(score):
         '<tspan\n' + \
         'x="27.5"\n' + \
         'y="37.3"\n' + \
-        'style="font-size:24px;text-align:center;text-anchor:middle">'\
+        'style="font-size:24px;text-align:center;text-anchor:middle;font-family:abc123">'\
         '%d' % score + \
         '</tspan></text>\n' + \
         '</svg>'
@@ -447,7 +447,7 @@ def _number(size, radius, number, color):
         'x="%f" ' % x + \
         'y="%f" ' % y + \
         'style="font-size:%fpx;' % pt + \
-        'text-align:center;text-anchor:middle;fill:%s">' % color + \
+        'text-align:center;text-anchor:middle;fill:%s;font-family:abc123">' % color + \
         str(number) + \
         '</tspan></text>\n' + \
         '</svg>'
@@ -530,7 +530,7 @@ def _try_again_icon(color):
         '<tspan\n' + \
         'x="315.5"\n' + \
         'y="97.874992"\n' + \
-        'style="font-size:48px;text-align:start;text-anchor:start;fill:%s;fill-opacity:1">' % color + \
+        'style="font-size:48px;text-align:start;text-anchor:start;fill:%s;fill-opacity:1;font-family:abc123">' % color + \
         _('Try again.') + \
         '</tspan>\n' + \
         '</text>\n' + \
