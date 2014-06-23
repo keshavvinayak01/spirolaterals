@@ -44,6 +44,12 @@ def _lighter_color(colors):
     return 1
 
 
+def is_low_contrast(colors):
+    ''' We require lots of luminance contrast to make color text legible. '''
+    # To turn off color on color, always return False
+    return _luminance(colors[0]) - _luminance(colors[1]) < 96
+
+
 class PeterActivity(activity.Activity):
     _LOWER = 0
     _UPPER = 1000
@@ -420,6 +426,9 @@ def _score_icon(score):
 
 
 def _number(size, radius, number, color):
+    if is_low_contrast([color, '#808080']):
+        color = '#000000'
+
     x = size / 2.
     y = size * 4 / 5.
     pt = size * 0.96
@@ -441,7 +450,7 @@ def _number(size, radius, number, color):
         'ry="%d"\n' % radius + \
         'x="0"\n' + \
         'y="0"\n' + \
-        'style="fill:#A0A0A0;fill-opacity:1;stroke:none;" />\n' + \
+        'style="fill:#808080;fill-opacity:1;stroke:none;" />\n' + \
         '<text>\n' + \
         '<tspan\n' + \
         'x="%f" ' % x + \
