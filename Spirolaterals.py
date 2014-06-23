@@ -57,6 +57,7 @@ class Spirolaterals:
         self.score = score
         self.pattern = pattern
         self.last_pattern = last
+        self._running = False
 
         self._turtle_canvas = None
         self._user_numbers = [1, 1, 1, 3, 2]
@@ -402,7 +403,6 @@ class Spirolaterals:
         self._canvas.queue_draw_area(r[0], r[1], r[2], r[3])
 
     def inval_all(self):
-        ''' Force a refresh '''
         self._canvas.queue_draw_area(0, 0, self._width, self._height)
 
     def __draw_cb(self, canvas, cr):
@@ -437,7 +437,8 @@ class Spirolaterals:
         self._user_turtles[0].move((int(x1 - dd / 2), y1))
         self._show_turtle(0)
 
-        GObject.timeout_add(self.delay, self._do_step, x1, y1, dd, 0)
+        if self._running:
+            GObject.timeout_add(self.delay, self._do_step, x1, y1, dd, 0)
 
     def _do_step(self, x1, y1, dd, h):
         if not self._running:
@@ -537,7 +538,12 @@ class Spirolaterals:
             self.inval_all()
             self._parent.cyan.set_sensitive(False)
         elif bu == 'green':  # Run level
-            self.do_run()
+            if self._running:
+                # If we are already running, then stop first.
+                self.do_stop()
+                GObject.timeout_add(self.delay * 2, self.do_run)
+            else:
+                self.do_run()
         elif bu == 'red':  # Stop level
             self.do_stop()
 
