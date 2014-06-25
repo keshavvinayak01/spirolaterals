@@ -182,7 +182,7 @@ class Spirolaterals:
             i = self._active_index
             j = int(k) - 1
             self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-            self._numbers[i][j].set_layer(1)
+            self._numbers[i][j].set_layer(10)
             self._user_numbers[i] = j + 1
             self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Up', 'j', 'Up']:
@@ -192,7 +192,7 @@ class Spirolaterals:
             if j < 5:
                 j += 1
             self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-            self._numbers[i][j - 1].set_layer(1)
+            self._numbers[i][j - 1].set_layer(10)
             self._user_numbers[i] = j
             self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Down', 'k', 'Down']:
@@ -202,7 +202,7 @@ class Spirolaterals:
             if j > 0:
                 j -= 1
             self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-            self._numbers[i][j - 1].set_layer(1)
+            self._numbers[i][j - 1].set_layer(10)
             self._user_numbers[i] = j
             self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Left', 'h', 'Left']:
@@ -233,7 +233,7 @@ class Spirolaterals:
             self._active_index = i
             j = int(self.press.name.split(',')[1])
             j1 = (j + 1) % 5
-            self._numbers[i][j1].set_layer(1)
+            self._numbers[i][j1].set_layer(10)
             self._numbers[i][j].set_layer(0)
             self._user_numbers[i] = j1 + 1
             self.inval(self._numbers[i][j].rect)
@@ -279,6 +279,7 @@ class Spirolaterals:
         elif h == 3:
             self._splot.move((x, y - int(dd / 2)))
         self._splot.set_layer(3)
+        self._failure.set_layer(5)
 
     def _show_turtle(self, t):
         for i in range(4):
@@ -329,11 +330,11 @@ class Spirolaterals:
                 self._numbers[i][j].set_layer(0)
                 self._glownumbers[i][j].set_layer(0)
         # Show user numbers
-        self._numbers[0][self._user_numbers[0] - 1].set_layer(1)
-        self._numbers[1][self._user_numbers[1] - 1].set_layer(1)
-        self._numbers[2][self._user_numbers[2] - 1].set_layer(1)
-        self._numbers[3][self._user_numbers[3] - 1].set_layer(1)
-        self._numbers[4][self._user_numbers[4] - 1].set_layer(1)
+        self._numbers[0][self._user_numbers[0] - 1].set_layer(10)
+        self._numbers[1][self._user_numbers[1] - 1].set_layer(10)
+        self._numbers[2][self._user_numbers[2] - 1].set_layer(10)
+        self._numbers[3][self._user_numbers[3] - 1].set_layer(10)
+        self._numbers[4][self._user_numbers[4] - 1].set_layer(10)
 
     def _show_background_graphics(self):
         self._draw_pixbuf(
@@ -434,7 +435,7 @@ class Spirolaterals:
         y1 = self.sy(UY[self.i])
         dd = self.ss(US[self.i])
         self._numbers[0][self._user_numbers[0] - 1].set_layer(0)
-        self._glownumbers[0][self._user_numbers[0] - 1].set_layer(1)
+        self._glownumbers[0][self._user_numbers[0] - 1].set_layer(10)
         self._user_turtles[0].move((int(x1 - dd / 2), y1))
         self._show_turtle(0)
 
@@ -476,7 +477,7 @@ class Spirolaterals:
         self.step += 1
         i = self._active_index
         if self.step == self._user_numbers[i]:
-            self._numbers[i][self._user_numbers[i] - 1].set_layer(1)
+            self._numbers[i][self._user_numbers[i] - 1].set_layer(10)
             self._glownumbers[i][self._user_numbers[i] - 1].set_layer(0)
             h += 1
             h %= 4
@@ -488,7 +489,7 @@ class Spirolaterals:
             else:
                 i = self._active_index
                 self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-                self._glownumbers[i][self._user_numbers[i] - 1].set_layer(1)
+                self._glownumbers[i][self._user_numbers[i] - 1].set_layer(10)
 
         if self.loop < 4 and self._running:
             GObject.timeout_add(self.delay, self._do_step, x2, y2, dd, h)
@@ -496,6 +497,7 @@ class Spirolaterals:
             self._running = False
             self._parent.green.set_sensitive(True)
             self._reset_user_turtle()
+            self._show_user_numbers()
             self._test_level()
 
     def _test_level(self):
