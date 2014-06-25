@@ -412,6 +412,7 @@ class Spirolaterals:
         self._sprites.redraw_sprites(cr=cr)
 
     def do_stop(self):
+        self._parent.green.set_sensitive(True)
         self._running = False
 
     def do_run(self):
@@ -492,6 +493,8 @@ class Spirolaterals:
         if self.loop < 4 and self._running:
             GObject.timeout_add(self.delay, self._do_step, x2, y2, dd, h)
         elif self.loop == 4:  # Test to see if we win
+            self._running = False
+            self._parent.green.set_sensitive(True)
             self._reset_user_turtle()
             self._test_level()
 
@@ -522,15 +525,13 @@ class Spirolaterals:
         self.delay = int(value)
 
     def do_button(self, bu):
+        self._success.hide()
+        self._failure.hide()
         if bu == 'cyan':  # Next level
-            self._success.hide()
-            self._failure.hide()
             self._splot.hide()
             self.pattern += 1
             if self.pattern == 123:
                 self.pattern = 1
-            self.help1 = 0
-            self.help2 = 0
             self._get_goal()
             self._show_background_graphics()
             self._draw_goal()
@@ -538,12 +539,8 @@ class Spirolaterals:
             self.inval_all()
             self._parent.cyan.set_sensitive(False)
         elif bu == 'green':  # Run level
-            if self._running:
-                # If we are already running, then stop first.
-                self.do_stop()
-                GObject.timeout_add(self.delay * 2, self.do_run)
-            else:
-                self.do_run()
+            self._parent.green.set_sensitive(False)
+            self.do_run()
         elif bu == 'red':  # Stop level
             self.do_stop()
 

@@ -110,11 +110,11 @@ class PeterActivity(activity.Activity):
             toolbox.toolbar.insert(self._separator1, -1)
         self._separator1.show()
 
-        green = ToolButton('green')
-        toolbox.toolbar.insert(green, -1)
-        green.set_tooltip(_('Draw'))
-        green.connect('clicked', self._button_cb, 'green')
-        green.show()
+        self.green = ToolButton('green')
+        toolbox.toolbar.insert(self.green, -1)
+        self.green.set_tooltip(_('Draw'))
+        self.green.connect('clicked', self._button_cb, 'green')
+        self.green.show()
 
         red = ToolButton('red')
         toolbox.toolbar.insert(red, -1)
@@ -456,7 +456,8 @@ def _number(size, radius, number, color):
         'x="%f" ' % x + \
         'y="%f" ' % y + \
         'style="font-size:%fpx;' % pt + \
-        'text-align:center;text-anchor:middle;fill:%s;font-family:abc123">' % color + \
+        'text-align:center;text-anchor:middle;' + \
+        'fill:%s;font-family:abc123">' % color + \
         str(number) + \
         '</tspan></text>\n' + \
         '</svg>'
