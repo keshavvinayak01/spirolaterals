@@ -45,6 +45,11 @@ US = [50, 50]  # user turtle line length
 GY = [500, 950]  # position of success/failure graphics
 LS = [24, 24]  # font size for level indicator
 
+NUMBER_LAYER = 10
+TURTLE_LAYER = 6
+SUCCESS_LAYER = 5
+HIDDEN_LAYER = 0
+
 
 class Spirolaterals:
 
@@ -181,8 +186,8 @@ class Spirolaterals:
             self.do_stop()
             i = self._active_index
             j = int(k) - 1
-            self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-            self._numbers[i][j].set_layer(10)
+            self._numbers[i][self._user_numbers[i] - 1].set_layer(HIDDEN_LAYER)
+            self._numbers[i][j].set_layer(NUMBER_LAYER)
             self._user_numbers[i] = j + 1
             self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Up', 'j', 'Up']:
@@ -191,8 +196,8 @@ class Spirolaterals:
             j = self._user_numbers[i]
             if j < 5:
                 j += 1
-            self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-            self._numbers[i][j - 1].set_layer(10)
+            self._numbers[i][self._user_numbers[i] - 1].set_layer(HIDDEN_LAYER)
+            self._numbers[i][j - 1].set_layer(NUMBER_LAYER)
             self._user_numbers[i] = j
             self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Down', 'k', 'Down']:
@@ -201,8 +206,8 @@ class Spirolaterals:
             j = self._user_numbers[i]
             if j > 0:
                 j -= 1
-            self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-            self._numbers[i][j - 1].set_layer(10)
+            self._numbers[i][self._user_numbers[i] - 1].set_layer(HIDDEN_LAYER)
+            self._numbers[i][j - 1].set_layer(NUMBER_LAYER)
             self._user_numbers[i] = j
             self.inval(self._numbers[i][j].rect)
         elif k in ['KP_Left', 'h', 'Left']:
@@ -233,8 +238,8 @@ class Spirolaterals:
             self._active_index = i
             j = int(self.press.name.split(',')[1])
             j1 = (j + 1) % 5
-            self._numbers[i][j1].set_layer(10)
-            self._numbers[i][j].set_layer(0)
+            self._numbers[i][j1].set_layer(NUMBER_LAYER)
+            self._numbers[i][j].set_layer(HIDDEN_LAYER)
             self._user_numbers[i] = j1 + 1
             self.inval(self._numbers[i][j].rect)
 
@@ -278,13 +283,13 @@ class Spirolaterals:
             self._splot.move((x - int(dd / 2), y - dd))
         elif h == 3:
             self._splot.move((x, y - int(dd / 2)))
-        self._splot.set_layer(3)
-        self._failure.set_layer(5)
+        self._splot.set_layer(SUCCESS_LAYER)
+        self._failure.set_layer(SUCCESS_LAYER)
 
     def _show_turtle(self, t):
         for i in range(4):
             if i == t:
-                self._user_turtles[i].set_layer(2)
+                self._user_turtles[i].set_layer(TURTLE_LAYER)
             else:
                 self._user_turtles[i].hide()
 
@@ -327,14 +332,14 @@ class Spirolaterals:
         # Hide the numbers
         for i in range(5):
             for j in range(5):
-                self._numbers[i][j].set_layer(0)
-                self._glownumbers[i][j].set_layer(0)
+                self._numbers[i][j].set_layer(HIDDEN_LAYER)
+                self._glownumbers[i][j].set_layer(HIDDEN_LAYER)
         # Show user numbers
-        self._numbers[0][self._user_numbers[0] - 1].set_layer(10)
-        self._numbers[1][self._user_numbers[1] - 1].set_layer(10)
-        self._numbers[2][self._user_numbers[2] - 1].set_layer(10)
-        self._numbers[3][self._user_numbers[3] - 1].set_layer(10)
-        self._numbers[4][self._user_numbers[4] - 1].set_layer(10)
+        self._numbers[0][self._user_numbers[0] - 1].set_layer(NUMBER_LAYER)
+        self._numbers[1][self._user_numbers[1] - 1].set_layer(NUMBER_LAYER)
+        self._numbers[2][self._user_numbers[2] - 1].set_layer(NUMBER_LAYER)
+        self._numbers[3][self._user_numbers[3] - 1].set_layer(NUMBER_LAYER)
+        self._numbers[4][self._user_numbers[4] - 1].set_layer(NUMBER_LAYER)
 
     def _show_background_graphics(self):
         self._draw_pixbuf(
@@ -434,8 +439,8 @@ class Spirolaterals:
         x1 = self.sx(UX[self.i])
         y1 = self.sy(UY[self.i])
         dd = self.ss(US[self.i])
-        self._numbers[0][self._user_numbers[0] - 1].set_layer(0)
-        self._glownumbers[0][self._user_numbers[0] - 1].set_layer(10)
+        self._numbers[0][self._user_numbers[0] - 1].set_layer(HIDDEN_LAYER)
+        self._glownumbers[0][self._user_numbers[0] - 1].set_layer(NUMBER_LAYER)
         self._user_turtles[0].move((int(x1 - dd / 2), y1))
         self._show_turtle(0)
 
@@ -477,8 +482,9 @@ class Spirolaterals:
         self.step += 1
         i = self._active_index
         if self.step == self._user_numbers[i]:
-            self._numbers[i][self._user_numbers[i] - 1].set_layer(10)
-            self._glownumbers[i][self._user_numbers[i] - 1].set_layer(0)
+            number = self._user_numbers[i] - 1
+            self._numbers[i][number].set_layer(NUMBER_LAYER)
+            self._glownumbers[i][number].set_layer(HIDDEN_LAYER)
             h += 1
             h %= 4
             self.step = 0
@@ -488,8 +494,9 @@ class Spirolaterals:
                 self._active_index = 0
             else:
                 i = self._active_index
-                self._numbers[i][self._user_numbers[i] - 1].set_layer(0)
-                self._glownumbers[i][self._user_numbers[i] - 1].set_layer(10)
+                number = self._user_numbers[i] - 1
+                self._numbers[i][number].set_layer(HIDDEN_LAYER)
+                self._glownumbers[i][number].set_layer(NUMBER_LAYER)
 
         if self.loop < 4 and self._running:
             GObject.timeout_add(self.delay, self._do_step, x2, y2, dd, h)
@@ -512,7 +519,7 @@ class Spirolaterals:
             self._do_fail()
 
     def _do_success(self):
-        self._success.set_layer(5)
+        self._success.set_layer(SUCCESS_LAYER)
         self._parent.cyan.set_sensitive(True)
         if self.last_pattern != self.pattern:
             self.score += 6
@@ -520,7 +527,7 @@ class Spirolaterals:
         self._parent.update_score(int(self.score))
 
     def _do_fail(self):
-        self._failure.set_layer(5)
+        self._failure.set_layer(SUCCESS_LAYER)
         self._parent.cyan.set_sensitive(False)
 
     def do_slider(self, value):
@@ -530,6 +537,7 @@ class Spirolaterals:
         self._success.hide()
         self._failure.hide()
         if bu == 'cyan':  # Next level
+            self.do_stop()
             self._splot.hide()
             self.pattern += 1
             if self.pattern == 123:
