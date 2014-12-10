@@ -17,7 +17,9 @@ import utils
 class Button:
     _instances = []
 
-    def __init__(self, name, (x1, y1), centre=True):  # eg ('plus',(30,40))
+    # eg ('plus',(30,40))
+    def __init__(self, name, xxx_todo_changeme, centre=True):
+        (x1, y1) = xxx_todo_changeme
         self._instances.append(self)
         up = utils.load_image(name + "_up.png", True)
         down = utils.load_image(name + "_down.png", True)

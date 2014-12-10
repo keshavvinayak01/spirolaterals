@@ -430,7 +430,7 @@ class Spirolaterals:
             self.tu.current = utils.copy_list(g.goal)
         self.tu.setup(self.colors[0])
         g.numbers = utils.copy_list(self.tu.current)
-        #buttons
+        # buttons
         x = g.sx(7.3)
         y = g.sy(16.5)
         dx = g.sy(2.6)

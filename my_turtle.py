@@ -177,6 +177,7 @@ class TurtleClass:  # used only for keeping track of the right hand turtle
         '''
         self.between_levels = True
 
+
 def correct(current):
     return trace(g.goal) == trace(current)
 
