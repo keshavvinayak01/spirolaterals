@@ -17,11 +17,20 @@ import pygame
 import g
 import load_save
 
+from gi.repository import Gio
+import dbus
+
 # constants
 RED, BLUE, GREEN = (255, 0, 0), (0, 0, 255), (0, 255, 0)
 BLACK, WHITE = (0, 0, 0), (255, 255, 255)
 CYAN, ORANGE, CREAM = (0, 255, 255), (255, 165, 0), (255, 255, 192)
 YELLOW = (255, 255, 0)
+OHM_SERVICE_NAME = 'org.freedesktop.ohm'
+OHM_SERVICE_PATH = '/org/freedesktop/ohm/Keystore'
+OHM_SERVICE_IFACE = 'org.freedesktop.ohm.Keystore'
+
+POWERD_FLAG_DIR = '/etc/powerd/flags'
+POWERD_INHIBIT_FLAG = '/etc/powerd/flags/inhibit-suspend'
 
 
 def exit():
@@ -282,3 +291,56 @@ def centre_to_top_left(img, xxx_todo_changeme12):
     x = cx - img.get_width() / 2
     y = cy - img.get_height() / 2
     return (x, y)
+
+
+def using_powerd():
+    # directory exists if powerd running, and it's recent
+    # enough to be controllable.
+    return os.access(POWERD_FLAG_DIR, os.W_OK)
+
+
+def get_automatic_pm():
+    if using_powerd():
+        return not os.access(POWERD_INHIBIT_FLAG, os.R_OK)
+
+    # ohmd
+    settings = Gio.Settings('org.sugarlabs.power')
+    return settings.get_boolean('automatic')
+
+
+def set_automatic_pm(enabled):
+    """Automatic suspends on/off."""
+
+    if using_powerd():
+        # powerd
+        if enabled == 'off' or enabled == 0:
+            try:
+                fd = open(POWERD_INHIBIT_FLAG, 'w')
+            except IOError:
+                print 'File %s is not writeable' % POWERD_INHIBIT_FLAG
+            else:
+                fd.close()
+        else:
+            os.unlink(POWERD_INHIBIT_FLAG)
+        return
+
+    # ohmd
+    bus = dbus.SystemBus()
+    proxy = bus.get_object(OHM_SERVICE_NAME, OHM_SERVICE_PATH)
+    keystore = dbus.Interface(proxy, OHM_SERVICE_IFACE)
+
+    if enabled == 'on' or enabled == 1:
+        keystore.SetKey('suspend.automatic_pm', 1)
+        enabled = True
+    elif enabled == 'off' or enabled == 0:
+        keystore.SetKey('suspend.automatic_pm', 0)
+        enabled = False
+
+    settings = Gio.Settings('org.sugarlabs.power')
+    settings.set_boolean('automatic', enabled)
+
+    # DEPRECATED
+    from gi.repository import GConf
+    client = GConf.Client.get_default()
+    client.set_string('/desktop/sugar/power/automatic', enabled)
+    return
