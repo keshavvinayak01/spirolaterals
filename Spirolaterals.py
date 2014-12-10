@@ -58,7 +58,8 @@ class Spirolaterals:
                         path = self.parent.good_job_image_path()
                         self.good_job = utils.load_image(path, True)
                     if g.w > g.h:
-                        utils.centre_blit(g.screen, self.good_job, (g.sx(7),                                                                                               g.sy(17)))
+                        utils.centre_blit(
+                            g.screen, self.good_job, (g.sx(7), g.sy(17)))
                     else:
                         utils.centre_blit(g.screen, self.good_job, (g.sx(7),
                                                                     g.sy(38)))
@@ -438,7 +439,7 @@ class Spirolaterals:
             self.tu.current = utils.copy_list(g.goal)
         self.tu.setup(self.colors[0])
         g.numbers = utils.copy_list(self.tu.current)
-        #buttons
+        # buttons
         x = g.sx(7.3)
         y = g.sy(16.5)
         dx = g.sy(2.6)
