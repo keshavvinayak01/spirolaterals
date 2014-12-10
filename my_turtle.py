@@ -87,6 +87,8 @@ class TurtleClass:  # used only for keeping track of the right hand turtle
         self.step_count = steps
 
     def draw(self):
+        start_pm = utils.get_automatic_pm()
+        utils.set_automatic_pm(False)
         if self.between_levels:
             return
 
@@ -163,6 +165,8 @@ class TurtleClass:  # used only for keeping track of the right hand turtle
                             g.help2 = 5
                         g.score = g.score + 6 - g.help2
                     g.finale = True
+
+        utils.set_automatic_pm(start_pm)
 
     def clear(self):
         '''
