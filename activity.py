@@ -49,6 +49,7 @@ class PeterActivity(activity.Activity):
 
         # No sharing
         self.max_participants = 1
+        self._saved_file = None
 
         # Build the activity toolbar.
         toolbox = ToolbarBox()
@@ -90,6 +91,12 @@ class PeterActivity(activity.Activity):
         labelitem.add(label)
         toolbox.toolbar.insert(labelitem, -1)
         labelitem.show()
+
+        export = ToolButton('export-turtleblocks')
+        toolbox.toolbar.insert(export, -1)
+        export.set_tooltip(_('Export to TurtleBlocks'))
+        export.connect('clicked', self._export_turtleblocks_cb)
+        export.show()
 
         separator = gtk.SeparatorToolItem()
         separator.props.draw = False
@@ -202,3 +209,62 @@ class PeterActivity(activity.Activity):
         logging.debug(self._adjustment.value)
         self.game.do_slider(self._adjustment.value)
         return True
+
+    def _export_turtleblocks_cb(self, button=None):
+        data = self.game.tu.current
+        step = 75
+        first = data[0] * step
+        second = data[1] * step
+        third = data[2] * step
+        fourth = data[3] * step
+        fifth = data[4] * step
+
+        turtle_data = '[[0, ["start", 219], 248, 92, [null, 1]],' +\
+                      '[1, ["repeat", 189], 266, 138, [0, 2, 3, null]],' +\
+                      '[2, ["number", 4], 322, 138, [1, null]],' +\
+                      '[3, "forward", 284, 180, [1, 4, 5]],' +\
+                      ('[4, ["number", %s], 348, 180, [3, null]],' % first) +\
+                      '[5, "right", 284, 222, [3, 6, 7]],' +\
+                      '[6, ["number", 90], 342, 222, [5, null]],' +\
+                      '[7, "forward", 284, 264, [5, 8, 9]],' +\
+                      ('[8, ["number", %s], 348, 264, [7, null]],' % second) +\
+                      '[9, "right", 284, 306, [7, 10, 11]],' +\
+                      '[10, ["number", 90], 342, 306, [9, null]],' +\
+                      '[11, "forward", 284, 348, [9, 12, 13]],' +\
+                      ('[12, ["number", %s], 348, 348, [11, null]],'% third)  +\
+                      '[13, "right", 284, 390, [11, 14, 15]],' +\
+                      '[14, ["number", 90], 342, 390, [13, null]],' +\
+                      '[15, "forward", 284, 432, [13, 16, 17]],' +\
+                      ('[16, ["number", %s], 348, 432, [15, null]],'% fourth)  +\
+                      '[17, "right", 284, 474, [15, 18, 19]],' +\
+                      '[18, ["number", 90], 342, 474, [17, null]],' +\
+                      '[19, "forward", 284, 516, [17, 20, 21]],' +\
+                      ('[20, ["number", %s], 348, 516, [19, null]],'% fifth)  +\
+                      '[21, "right", 284, 558, [19, 22, null]],' +\
+                      '[22, ["number", 90], 342, 558, [21, null]]]'
+
+        dialog = gtk.FileChooserDialog("Export to TurtleBlocks", None,
+                                       gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                       gtk.STOCK_SAVE, gtk.RESPONSE_OK))
+
+        dialog.set_default_response(gtk.RESPONSE_OK)
+        dialog.set_keep_above(True)
+        dialog.set_do_overwrite_confirmation(True)
+
+        if self._saved_file != None:
+            dialog.set_filename(self._saved_file)
+
+        if dialog.run() == gtk.RESPONSE_OK:
+            filename = dialog.get_filename()
+
+            if not filename.endswith(".tb"):
+                filename += ".tb"
+
+            self._saved_file = filename
+
+            file = open(self._saved_file, "w")
+            file.write(turtle_data)
+            file.close()
+
+        dialog.destroy()
