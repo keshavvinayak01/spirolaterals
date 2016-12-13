@@ -13,15 +13,18 @@
 from gettext import gettext as _
 import logging
 
+import os
 import gtk
 import gobject
 
 from sugar.activity import activity
+from sugar.datastore import datastore
 from sugar.graphics.toolbarbox import ToolbarBox
 from sugar.activity.widgets import ActivityToolbarButton, StopButton
 from sugar.graphics.toolbarbox import ToolbarButton
 from sugar.graphics.toolbutton import ToolButton
 from sugar.graphics.style import GRID_CELL_SIZE
+from sugar.graphics.alert import Alert
 from sugar import profile
 
 import pygame
@@ -49,6 +52,7 @@ class PeterActivity(activity.Activity):
 
         # No sharing
         self.max_participants = 1
+        self.datapath = os.path.join(activity.get_activity_root(), 'instance')
 
         # Build the activity toolbar.
         toolbox = ToolbarBox()
@@ -90,6 +94,12 @@ class PeterActivity(activity.Activity):
         labelitem.add(label)
         toolbox.toolbar.insert(labelitem, -1)
         labelitem.show()
+
+        export = ToolButton('export-turtleblocks')
+        toolbox.toolbar.insert(export, -1)
+        export.set_tooltip(_('Export to TurtleBlocks'))
+        export.connect('clicked', self._export_turtleblocks_cb)
+        export.show()
 
         separator = gtk.SeparatorToolItem()
         separator.props.draw = False
@@ -202,3 +212,63 @@ class PeterActivity(activity.Activity):
         logging.debug(self._adjustment.value)
         self.game.do_slider(self._adjustment.value)
         return True
+
+    def _export_turtleblocks_cb(self, button=None):
+        alert = Alert()
+        alert.props.title = _('Save as TurtleBlocks project')
+        self.add_alert(alert)
+        alert.show()
+
+        gobject.idle_add(self._export_turtleblocks, alert)
+
+    def _export_turtleblocks(self, alert):
+        data = self.game.tu.current
+        step = 75
+        first = data[0] * step
+        second = data[1] * step
+        third = data[2] * step
+        fourth = data[3] * step
+        fifth = data[4] * step
+
+        turtle_data = '[[0, ["start", 219], 248, 92, [null, 1]],' +\
+                      '[1, ["repeat", 189], 266, 138, [0, 2, 3, null]],' +\
+                      '[2, ["number", 4], 322, 138, [1, null]],' +\
+                      '[3, "forward", 284, 180, [1, 4, 5]],' +\
+                      ('[4, ["number", %s], 348, 180, [3, null]],' % first) +\
+                      '[5, "right", 284, 222, [3, 6, 7]],' +\
+                      '[6, ["number", 90], 342, 222, [5, null]],' +\
+                      '[7, "forward", 284, 264, [5, 8, 9]],' +\
+                      ('[8, ["number", %s], 348, 264, [7, null]],' % second) +\
+                      '[9, "right", 284, 306, [7, 10, 11]],' +\
+                      '[10, ["number", 90], 342, 306, [9, null]],' +\
+                      '[11, "forward", 284, 348, [9, 12, 13]],' +\
+                      ('[12, ["number", %s], 348, 348, [11, null]],'% third)  +\
+                      '[13, "right", 284, 390, [11, 14, 15]],' +\
+                      '[14, ["number", 90], 342, 390, [13, null]],' +\
+                      '[15, "forward", 284, 432, [13, 16, 17]],' +\
+                      ('[16, ["number", %s], 348, 432, [15, null]],'% fourth)  +\
+                      '[17, "right", 284, 474, [15, 18, 19]],' +\
+                      '[18, ["number", 90], 342, 474, [17, null]],' +\
+                      '[19, "forward", 284, 516, [17, 20, 21]],' +\
+                      ('[20, ["number", %s], 348, 516, [19, null]],'% fifth)  +\
+                      '[21, "right", 284, 558, [19, 22, null]],' +\
+                      '[22, ["number", 90], 342, 558, [21, null]]]'
+
+        file_path = os.path.join(self.datapath, 'output.tb')
+        with open(file_path, "w") as file:
+            file.write(turtle_data)
+
+        dsobject = datastore.create()
+        dsobject.metadata['title'] = '%s %s' % (self.metadata['title'], _('TurtleBlocks'))
+        dsobject.metadata['icon-color'] = profile.get_color().to_string()
+        dsobject.metadata['mime_type'] = 'application/x-turtle-art'
+        dsobject.metadata['activity'] = 'org.laptop.TurtleArtActivity'
+        dsobject.set_file_path(file_path)
+        datastore.write(dsobject)
+        dsobject.destroy()
+        os.remove(file_path)
+
+        gobject.timeout_add(1000, self._remove_alert, alert)
+
+    def _remove_alert(self, alert):
+        self.remove_alert(alert)
