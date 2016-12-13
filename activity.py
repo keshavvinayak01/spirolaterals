@@ -13,15 +13,18 @@
 from gettext import gettext as _
 import logging
 
+import os
 import gtk
 import gobject
 
 from sugar.activity import activity
+from sugar.datastore import datastore
 from sugar.graphics.toolbarbox import ToolbarBox
 from sugar.activity.widgets import ActivityToolbarButton, StopButton
 from sugar.graphics.toolbarbox import ToolbarButton
 from sugar.graphics.toolbutton import ToolButton
 from sugar.graphics.style import GRID_CELL_SIZE
+from sugar.graphics.alert import Alert
 from sugar import profile
 
 import pygame
@@ -49,7 +52,7 @@ class PeterActivity(activity.Activity):
 
         # No sharing
         self.max_participants = 1
-        self._saved_file = None
+        self.datapath = os.path.join(activity.get_activity_root(), 'instance')
 
         # Build the activity toolbar.
         toolbox = ToolbarBox()
@@ -211,6 +214,14 @@ class PeterActivity(activity.Activity):
         return True
 
     def _export_turtleblocks_cb(self, button=None):
+        alert = Alert()
+        alert.props.title = _('Save as TurtleBlocks project')
+        self.add_alert(alert)
+        alert.show()
+
+        gobject.idle_add(self._export_turtleblocks, alert)
+
+    def _export_turtleblocks(self, alert):
         data = self.game.tu.current
         step = 75
         first = data[0] * step
@@ -243,28 +254,21 @@ class PeterActivity(activity.Activity):
                       '[21, "right", 284, 558, [19, 22, null]],' +\
                       '[22, ["number", 90], 342, 558, [21, null]]]'
 
-        dialog = gtk.FileChooserDialog("Export to TurtleBlocks", None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                       gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-
-        dialog.set_default_response(gtk.RESPONSE_OK)
-        dialog.set_keep_above(True)
-        dialog.set_do_overwrite_confirmation(True)
-
-        if self._saved_file != None:
-            dialog.set_filename(self._saved_file)
-
-        if dialog.run() == gtk.RESPONSE_OK:
-            filename = dialog.get_filename()
-
-            if not filename.endswith(".tb"):
-                filename += ".tb"
-
-            self._saved_file = filename
-
-            file = open(self._saved_file, "w")
+        file_path = os.path.join(self.datapath, 'output.tb')
+        with open(file_path, "w") as file:
             file.write(turtle_data)
-            file.close()
 
-        dialog.destroy()
+        dsobject = datastore.create()
+        dsobject.metadata['title'] = '%s %s' % (self.metadata['title'], _('TurtleBlocks'))
+        dsobject.metadata['icon-color'] = profile.get_color().to_string()
+        dsobject.metadata['mime_type'] = 'application/x-turtle-art'
+        dsobject.metadata['activity'] = 'org.laptop.TurtleArtActivity'
+        dsobject.set_file_path(file_path)
+        datastore.write(dsobject)
+        dsobject.destroy()
+        os.remove(file_path)
+
+        gobject.timeout_add(1000, self._remove_alert, alert)
+
+    def _remove_alert(self, alert):
+        self.remove_alert(alert)
