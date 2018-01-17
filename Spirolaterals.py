@@ -257,7 +257,7 @@ class Spirolaterals:
         dx = 0
         dy = -g.dd
         for i in range(4):
-            for j in g.goal:
+            for j in g.goals[0]:
                 for k in range(j):
                     x2 = x1 + dx
                     y2 = y1 + dy
@@ -280,21 +280,20 @@ class Spirolaterals:
 
     def calc_steps(self, l):  # calculates total # of steps for a given
                               # pattern eg [1,2,3,4,5] = (1+2+3+4+5)*4=60
-        return sum(l) * 4
+        return [sum(x) * 4 for x in l]
 
     def get_goal(self):
         fname = os.path.join('data', 'patterns.dat')
         try:
-            f = open(fname, 'r')
-            for n in range(0, g.pattern):
-                s = f.readline()
-            s = s[0:5]
+            with open(fname, 'r') as f:
+                for n in range(0, g.pattern):
+                    s = f.readline().strip()
         except:
-            s = 11132
+            s = "11132"
             g.pattern = 1
-        f.close
-        l = [int(c) for c in str(s)]
-        g.goal = l
+        s = s.split(" ")
+        l = [[int(x) for x in y] for y in s]
+        g.goals = l
         g.steps = self.calc_steps(l)
 
     def draw_nos(self):  # draw the numbers with glow in correct position
@@ -360,7 +359,7 @@ class Spirolaterals:
     def solution(self):
         s = ''
         for i in range(5):
-            s += str(g.goal[i]) + ' '
+            s += str(g.goals[0][i]) + ' '
         s = s[:9]
         return s
 
@@ -379,12 +378,13 @@ class Spirolaterals:
         self.tu.crashed = False
         g.help1 = 0
         looking = True
+        best_match = self.help_answer()
         while looking:
             g.help1 += 1
             ind = g.help1 - 1
-            if g.numbers[ind] != g.goal[ind]:
-                g.numbers[ind] = g.goal[ind]
-                self.tu.current[ind] = g.goal[ind]
+            if g.numbers[ind] != g.goals[best_match][ind]:
+                g.numbers[ind] = g.goals[best_match][ind]
+                self.tu.current[ind] = g.goals[best_match][ind]
                 g.show_help = True
                 self.tu.changed = True
                 g.help2 += 1
@@ -392,6 +392,15 @@ class Spirolaterals:
             if g.help1 > 4:
                 g.show_help = True
                 looking = False
+
+    def help_answer(self):
+        scores = []
+        for goal in g.goals:
+            ind = 0
+            while(g.numbers[ind] == goal[ind]):
+                ind += 1
+            scores.append(ind)
+        return scores.index(max(scores))    
 
     def flush_queue(self):
         flushing = True
@@ -427,7 +436,7 @@ class Spirolaterals:
         self.tu.current = [1, 1, 1, 3, 2]
         self.get_goal()
         if g.pattern == 1:
-            self.tu.current = utils.copy_list(g.goal)
+            self.tu.current = utils.copy_list(g.goals[0])
         self.tu.setup(self.colors[0])
         g.numbers = utils.copy_list(self.tu.current)
         # buttons

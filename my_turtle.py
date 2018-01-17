@@ -179,7 +179,10 @@ class TurtleClass:  # used only for keeping track of the right hand turtle
 
 
 def correct(current):
-    return trace(g.goal) == trace(current)
+    for goal in g.goals:
+        if trace(goal) == trace(current):
+            return True
+    return False
 
 
 def trace(l):  # returns a list based on the line segments drawn
