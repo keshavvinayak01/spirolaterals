@@ -145,7 +145,7 @@ def init():  # called by main()
     pygame.mouse.set_visible(False)
 
     # this activity only
-    global x0, y0, x1, y1, goal, steps, pattern, delay, help1, help2, show_help
+    global x0, y0, x1, y1, goals, steps, pattern, delay, help1, help2, show_help
     global big, big_surface, score, slider, level, finale, player_surface
     global crash_drawn, magician, magician_c
     global bgd, box, dd, magician, turtle, crash, smiley, n, n_glow
@@ -160,8 +160,8 @@ def init():  # called by main()
     else:
         x1 = sx(2.0)
         y1 = sy(17)  # right frame
-    goal = []
-    steps = 40  # number of steps to draw pic
+    goals = []
+    steps = [40]  # number of steps to draw pic
     pattern = 1
     level = 1
     delay = (3 - level) * 400
