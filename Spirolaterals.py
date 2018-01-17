@@ -289,9 +289,9 @@ class Spirolaterals:
                 for n in range(0, g.pattern):
                     s = f.readline().strip()
         except:
-            s = "11132"
+            s = '11132'
             g.pattern = 1
-        s = s.split(" ")
+        s = s.split(' ')
         l = [[int(x) for x in y] for y in s]
         g.goals = l
         g.steps = self.calc_steps(l)
