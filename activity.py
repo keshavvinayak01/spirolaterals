@@ -12,24 +12,27 @@
 
 from gettext import gettext as _
 import logging
-
 import os
-import gtk
-import gobject
 
-from sugar.activity import activity
-from sugar.datastore import datastore
-from sugar.graphics.toolbarbox import ToolbarBox
-from sugar.activity.widgets import ActivityToolbarButton, StopButton
-from sugar.graphics.toolbarbox import ToolbarButton
-from sugar.graphics.toolbutton import ToolButton
-from sugar.graphics.style import GRID_CELL_SIZE
-from sugar.graphics.alert import Alert
-from sugar import profile
-
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
 import pygame
-import sugargame.canvas
 
+
+from sugar3.activity import activity
+from sugar3.datastore import datastore
+from sugar3.graphics.toolbarbox import ToolbarBox
+from sugar3.activity.widgets import ActivityToolbarButton
+from sugar3.activity.widgets import ToolButton
+from sugar3.activity.widgets import StopButton
+from sugar3.graphics.style import GRID_CELL_SIZE
+from sugar3.graphics.alert import Alert
+from sugar3 import profile
+
+import sugargame.canvas
 import load_save
 import Spirolaterals
 
@@ -55,91 +58,94 @@ class PeterActivity(activity.Activity):
         self.datapath = os.path.join(activity.get_activity_root(), 'instance')
 
         # Build the activity toolbar.
-        toolbox = ToolbarBox()
+        toolbar_box = ToolbarBox()
 
         activity_button = ActivityToolbarButton(self)
-        toolbox.toolbar.insert(activity_button, 0)
+        toolbar_box.toolbar.insert(activity_button, 0)
         activity_button.show()
 
-        self._add_speed_slider(toolbox.toolbar)
+        self._add_speed_slider(toolbar_box.toolbar)
 
         cyan = ToolButton('cyan')
-        toolbox.toolbar.insert(cyan, -1)
+        toolbar_box.toolbar.insert(cyan, -1)
         cyan.set_tooltip(_('Next pattern'))
         cyan.connect('clicked', self._button_cb, 'cyan')
         cyan.set_sensitive(False)
         cyan.show()
 
         green = ToolButton('green')
-        toolbox.toolbar.insert(green, -1)
+        toolbar_box.toolbar.insert(green, -1)
         green.set_tooltip(_('Draw'))
         green.connect('clicked', self._button_cb, 'green')
         green.show()
 
         red = ToolButton('red')
-        toolbox.toolbar.insert(red, -1)
+        toolbar_box.toolbar.insert(red, -1)
         red.set_tooltip(_('Stop'))
         red.connect('clicked', self._button_cb, 'red')
         red.show()
 
-        separator = gtk.SeparatorToolItem()
+        separator = Gtk.SeparatorToolItem()
         separator.props.draw = True
-        toolbox.toolbar.insert(separator, -1)
+        toolbar_box.toolbar.insert(separator, -1)
         separator.show()
 
-        label = gtk.Label('')
+        label = Gtk.Label('')
         label.set_use_markup(True)
         label.show()
-        labelitem = gtk.ToolItem()
+        labelitem = Gtk.ToolItem()
         labelitem.add(label)
-        toolbox.toolbar.insert(labelitem, -1)
+        toolbar_box.toolbar.insert(labelitem, -1)
         labelitem.show()
 
         export = ToolButton('export-turtleblocks')
-        toolbox.toolbar.insert(export, -1)
+        toolbar_box.toolbar.insert(export, -1)
         export.set_tooltip(_('Export to TurtleBlocks'))
         export.connect('clicked', self._export_turtleblocks_cb)
         export.show()
 
-        separator = gtk.SeparatorToolItem()
+        separator = Gtk.SeparatorToolItem()
         separator.props.draw = False
         separator.set_expand(True)
-        toolbox.toolbar.insert(separator, -1)
+        toolbar_box.toolbar.insert(separator, -1)
         separator.show()
 
         stop_button = StopButton(self)
-        stop_button.props.accelerator = _('<Ctrl>Q')
-        toolbox.toolbar.insert(stop_button, -1)
+        toolbar_box.toolbar.insert(stop_button, -1)
         stop_button.show()
 
-        toolbox.show()
-        self.set_toolbox(toolbox)
-
+        toolbar_box.show()
+        self.set_toolbar_box(toolbar_box)
         # Create the game instance.
         self.game = Spirolaterals.Spirolaterals(colors)
 
         # Build the Pygame canvas.
-        self._pygamecanvas = \
-            sugargame.canvas.PygameCanvas(self)
+        self.game.canvas = self._pygamecanvas = \
+            sugargame.canvas.PygameCanvas(self,
+                main=self.game.run,
+                modules=[pygame.display, pygame.font])
+
+
         # Note that set_canvas implicitly calls
         # read_file when resuming from the Journal.
         self.set_canvas(self._pygamecanvas)
-        self.game.canvas = self._pygamecanvas
 
-        gtk.gdk.screen_get_default().connect('size-changed',
+        Gdk.Screen.get_default().connect('size-changed',
                                              self.__configure_cb)
 
         # Start the game running.
         self.game.set_cyan_button(cyan)
         self.game.set_label(label)
         self._speed_range.set_value(200)
-        self._pygamecanvas.run_pygame(self.game.run)
+
+    def get_preview(self):
+        return self._pygamecanvas.get_preview()
 
     def __configure_cb(self, event):
         ''' Screen size has changed '''
         logging.debug(self._pygamecanvas.get_allocation())
-        pygame.display.set_mode((gtk.gdk.screen_width(),
-                                 gtk.gdk.screen_height() - GRID_CELL_SIZE),
+        pygame.display.set_mode((Gdk.Screen.width(),
+                                 Gdk.Screen.height() - GRID_CELL_SIZE),
                                 pygame.RESIZABLE)
         self.game.save_pattern()
         self.game.g_init()
@@ -170,13 +176,13 @@ class PeterActivity(activity.Activity):
                                          self._speed_stepper_down_cb)
         self._speed_stepper_down.show()
 
-        self._adjustment = gtk.Adjustment(
+        self._adjustment = Gtk.Adjustment.new(
             200, self.LOWER, self.UPPER, 25, 100, 0)
+        
         self._adjustment.connect('value_changed', self._speed_change_cb)
-        self._speed_range = gtk.HScale(self._adjustment)
+        self._speed_range = Gtk.HScale.new(self._adjustment)
         self._speed_range.set_inverted(True)
         self._speed_range.set_draw_value(False)
-        self._speed_range.set_update_policy(gtk.UPDATE_CONTINUOUS)
         self._speed_range.set_size_request(120, 15)
         self._speed_range.show()
 
@@ -185,7 +191,7 @@ class PeterActivity(activity.Activity):
         self._speed_stepper_up.connect('clicked', self._speed_stepper_up_cb)
         self._speed_stepper_up.show()
 
-        self._speed_range_tool = gtk.ToolItem()
+        self._speed_range_tool = Gtk.ToolItem()
         self._speed_range_tool.add(self._speed_range)
         self._speed_range_tool.show()
 
@@ -209,8 +215,8 @@ class PeterActivity(activity.Activity):
             self._speed_range.set_value(self.LOWER)
 
     def _speed_change_cb(self, button=None):
-        logging.debug(self._adjustment.value)
-        self.game.do_slider(self._adjustment.value)
+        logging.debug(self._adjustment.get_value())
+        self.game.do_slider(self._adjustment.get_value())
         return True
 
     def _export_turtleblocks_cb(self, button=None):
@@ -219,7 +225,7 @@ class PeterActivity(activity.Activity):
         self.add_alert(alert)
         alert.show()
 
-        gobject.idle_add(self._export_turtleblocks, alert)
+        GObject.idle_add(self._export_turtleblocks, alert)
 
     def _export_turtleblocks(self, alert):
         data = self.game.tu.current
@@ -268,7 +274,7 @@ class PeterActivity(activity.Activity):
         dsobject.destroy()
         os.remove(file_path)
 
-        gobject.timeout_add(1000, self._remove_alert, alert)
+        GObject.timeout_add(1000, self._remove_alert, alert)
 
     def _remove_alert(self, alert):
         self.remove_alert(alert)

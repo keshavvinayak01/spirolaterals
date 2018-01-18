@@ -96,7 +96,7 @@ ver = '4.3'
 ver = '21'
 # flush_queue() added after button press and key press
 ver = '22'
-# flush_queue() doesn't use gtk on non-XO
+# flush_queue() doesn't use Gtk on non-XO
 ver = '23'
 # removed patterns 9 & 10 - now have 122 patterns
 ver = '24'
