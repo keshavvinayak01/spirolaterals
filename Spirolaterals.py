@@ -87,7 +87,7 @@ class Spirolaterals:
     def do_button(self, bu):
         if bu == 'cyan':
             g.pattern += 1
-            if g.pattern == 123:
+            if g.pattern == 93:
                 g.pattern = 1
             g.help1 = 0
             g.help2 = 0
