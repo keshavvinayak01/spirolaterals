@@ -24,7 +24,7 @@ def find_solutions(trace_ans, state, index):
 
 
 if(__name__ == "__main__"):
-    traces = []
+    traces, all_sols = [], []
 
     fname = os.path.join('data', 'patterns.dat')
     with open(fname, 'r') as f:
@@ -41,9 +41,12 @@ if(__name__ == "__main__"):
     with open('data/patterns.dat', 'w') as f:
         for value in traces:
             solutions = find_solutions(value, [1, 1, 1, 1, 1], 0)
-            for pattern in solutions:
-                for element in pattern:
-                    f.write(str(element))
-                if pattern != solutions[-1]:
-                    f.write(" ")
-            f.write('\n')
+            if solutions not in all_sols:
+                all_sols.append(solutions)
+                for pattern in solutions:
+                    for element in pattern:
+                        f.write(str(element))
+                    if pattern != solutions[-1]:
+                        f.write(" ")
+            if value != traces[-1]:
+                f.write('\n')
