@@ -106,6 +106,13 @@ def copy_list(l):
     return new_list
 
 
+def count_lines(filepath):
+    with open(filepath) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
+
+
 def shuffle(lst):
     l1 = lst
     lt = []
