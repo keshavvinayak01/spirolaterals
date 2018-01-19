@@ -1,3 +1,4 @@
+import os
 from copy import copy
 from my_turtle import trace
 
@@ -25,7 +26,8 @@ def find_solutions(trace_ans, state, index):
 if(__name__ == "__main__"):
     traces = []
 
-    with open('data/patterns.dat', 'r') as f:
+    fname = os.path.join('data', 'patterns.dat')
+    with open(fname, 'r') as f:
         for line in f:
             pattern = line.split()[0]
             pattern = [int(x) for x in pattern]
