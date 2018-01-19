@@ -36,6 +36,8 @@ class Spirolaterals:
         self.label = None
         self.cyan_button = None
         self.pattern = 1
+        self.num_patterns = utils.count_lines(
+            os.path.join('data', 'patterns.dat'))
 
     def display(self):  # called each loop
         if g.big:
@@ -87,7 +89,7 @@ class Spirolaterals:
     def do_button(self, bu):
         if bu == 'cyan':
             g.pattern += 1
-            if g.pattern == 93:
+            if g.pattern == self.num_patterns + 1:
                 g.pattern = 1
             g.help1 = 0
             g.help2 = 0
