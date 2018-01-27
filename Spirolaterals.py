@@ -92,6 +92,9 @@ class Spirolaterals:
     def set_cyan_button(self, cyan):
         self.cyan_button = cyan
 
+    def set_label(self, label):
+        self.label = label
+
     def do_slider(self, value):
         g.delay = int(value)
 
