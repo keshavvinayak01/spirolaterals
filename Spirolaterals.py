@@ -28,8 +28,10 @@ import slider
 
 class Spirolaterals:
 
-    def __init__(self, colors, sugar=True):
+    def __init__(self, colors, parent=None, sugar=True):
         self.colors = colors
+        self.parent = parent
+        self.good_job = None
         self.sugar = sugar
         self.journal = True  # set to False if we come in via main()
         self.canvas = None
@@ -57,7 +59,19 @@ class Spirolaterals:
                               (g.x0 + 4 * g.dd, g.y0 + 6 * g.dd))
             self.tu.draw()
             if self.tu.win:
-                utils.centre_blit(g.screen, g.smiley, (g.sx(16.6), g.sy(2.2)))
+                if self.sugar:
+                    if self.good_job is None:
+                        path = self.parent.good_job_image_path()
+                        self.good_job = utils.load_image(path, True)
+                    if g.w > g.h:
+                        utils.centre_blit(
+                            g.screen, self.good_job, (g.sx(7), g.sy(17)))
+                    else:
+                        utils.centre_blit(g.screen, self.good_job, (g.sx(7),
+                                                                    g.sy(38)))
+                else:
+                    utils.centre_blit(g.screen, g.smiley, (g.sx(16.6),
+                                                           g.sy(2.2)))
                 if self.sugar:
                     self.cyan_button.set_sensitive(True)
                 else:
@@ -70,12 +84,11 @@ class Spirolaterals:
                 self.slider.draw()
             if g.score > 0:
                 if self.sugar:
-                    self.label.set_markup(
-                        '<span><big><b> %s</b></big></span>' % (str(g.score)))
+                    self.parent.update_score(int(g.score))
                 else:
                     utils.display_score()
             utils.display_number1(g.pattern, (g.sx(2.4), g.sy(2)),
-                                  g.font1, utils.BLUE)
+                                  g.font1, utils.WHITE)
 
     def set_cyan_button(self, cyan):
         self.cyan_button = cyan
@@ -429,6 +442,12 @@ class Spirolaterals:
         g.init()
 
     def run(self, restore=False):
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                return
+            elif event.type == pygame.VIDEORESIZE:
+                pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                break
         self.g_init()
         if not self.journal:
             utils.load()

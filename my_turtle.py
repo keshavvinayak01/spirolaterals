@@ -8,7 +8,6 @@
     (at your option) any later version.
 
 """
-import logging
 import pygame
 
 import g
