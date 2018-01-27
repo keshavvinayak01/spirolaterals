@@ -35,7 +35,6 @@ class Spirolaterals:
         self.sugar = sugar
         self.journal = True  # set to False if we come in via main()
         self.canvas = None
-        self.label = None
         self.cyan_button = None
         self.pattern = 1
         self.num_patterns = utils.count_lines(
@@ -92,9 +91,6 @@ class Spirolaterals:
 
     def set_cyan_button(self, cyan):
         self.cyan_button = cyan
-
-    def set_label(self, label):
-        self.label = label
 
     def do_slider(self, value):
         g.delay = int(value)
