@@ -2,6 +2,7 @@
 # my standard link between sugar and my activity
 """
     Copyright (C) 2010  Peter Hewitt
+    Copyright (C) 2013  Ignacio Rodriguez
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -10,29 +11,26 @@
 
 """
 
+import os
 from gettext import gettext as _
 import logging
-import os
 
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
-from gi.repository import GObject
-import pygame
-
+from gi.repository import GdkPixbuf
 
 from sugar3.activity import activity
-from sugar3.datastore import datastore
 from sugar3.graphics.toolbarbox import ToolbarBox
-from sugar3.activity.widgets import ActivityToolbarButton
-from sugar3.activity.widgets import ToolButton
-from sugar3.activity.widgets import StopButton
+from sugar3.activity.widgets import ActivityToolbarButton, StopButton
+from sugar3.graphics.toolbutton import ToolButton
 from sugar3.graphics.style import GRID_CELL_SIZE
-from sugar3.graphics.alert import Alert
 from sugar3 import profile
 
+import pygame
 import sugargame.canvas
+
 import load_save
 import Spirolaterals
 
@@ -45,80 +43,91 @@ class PeterActivity(activity.Activity):
         super(PeterActivity, self).__init__(handle)
 
         # Get user's Sugar colors
-        sugarcolors = profile.get_color().to_string().split(',')
-        colors = [[int(sugarcolors[0][1:3], 16),
-                   int(sugarcolors[0][3:5], 16),
-                   int(sugarcolors[0][5:7], 16)],
-                  [int(sugarcolors[1][1:3], 16),
-                   int(sugarcolors[1][3:5], 16),
-                   int(sugarcolors[1][5:7], 16)]]
+        self._sugarcolors = profile.get_color().to_string().split(',')
+        colors = [[int(self._sugarcolors[0][1:3], 16),
+                   int(self._sugarcolors[0][3:5], 16),
+                   int(self._sugarcolors[0][5:7], 16)],
+                  [int(self._sugarcolors[1][1:3], 16),
+                   int(self._sugarcolors[1][3:5], 16),
+                   int(self._sugarcolors[1][5:7], 16)]]
 
         # No sharing
         self.max_participants = 1
-        self.datapath = os.path.join(activity.get_activity_root(), 'instance')
 
         # Build the activity toolbar.
-        toolbar_box = ToolbarBox()
+        toolbox = ToolbarBox()
 
         activity_button = ActivityToolbarButton(self)
-        toolbar_box.toolbar.insert(activity_button, 0)
+        toolbox.toolbar.insert(activity_button, 0)
         activity_button.show()
 
-        self._add_speed_slider(toolbar_box.toolbar)
+        self.separator0 = Gtk.SeparatorToolItem()
+        self.separator0.props.draw = False
+        if Gdk.Screen.width() > 1023:
+            toolbox.toolbar.insert(self.separator0, -1)
+        self.separator0.show()
 
-        cyan = ToolButton('cyan')
-        toolbar_box.toolbar.insert(cyan, -1)
-        cyan.set_tooltip(_('Next pattern'))
-        cyan.connect('clicked', self._button_cb, 'cyan')
-        cyan.set_sensitive(False)
-        cyan.show()
+        self._add_speed_slider(toolbox.toolbar)
+
+        self.separator1 = Gtk.SeparatorToolItem()
+        self.separator1.props.draw = False
+        if Gdk.Screen.width() > 1023:
+            toolbox.toolbar.insert(self.separator1, -1)
+        self.separator1.show()
 
         green = ToolButton('green')
-        toolbar_box.toolbar.insert(green, -1)
+        toolbox.toolbar.insert(green, -1)
         green.set_tooltip(_('Draw'))
         green.connect('clicked', self._button_cb, 'green')
         green.show()
 
         red = ToolButton('red')
-        toolbar_box.toolbar.insert(red, -1)
+        toolbox.toolbar.insert(red, -1)
         red.set_tooltip(_('Stop'))
         red.connect('clicked', self._button_cb, 'red')
         red.show()
 
-        separator = Gtk.SeparatorToolItem()
-        separator.props.draw = True
-        toolbar_box.toolbar.insert(separator, -1)
-        separator.show()
+        cyan = ToolButton('cyan')
+        toolbox.toolbar.insert(cyan, -1)
+        cyan.set_tooltip(_('Next pattern'))
+        cyan.connect('clicked', self._button_cb, 'cyan')
+        cyan.set_sensitive(False)
+        cyan.show()
+
+        self.separator2 = Gtk.SeparatorToolItem()
+        self.separator2.props.draw = False
+        if Gdk.Screen.width() > 1023:
+            toolbox.toolbar.insert(self.separator2, -1)
+        self.separator2.show()
 
         label = Gtk.Label('')
         label.set_use_markup(True)
         label.show()
         labelitem = Gtk.ToolItem()
         labelitem.add(label)
-        toolbar_box.toolbar.insert(labelitem, -1)
+        toolbox.toolbar.insert(labelitem, -1)
         labelitem.show()
 
-        export = ToolButton('export-turtleblocks')
-        toolbar_box.toolbar.insert(export, -1)
-        export.set_tooltip(_('Export to TurtleBlocks'))
-        export.connect('clicked', self._export_turtleblocks_cb)
-        export.show()
+        self._score_image = Gtk.Image()
+        item = Gtk.ToolItem()
+        item.add(self._score_image)
+        toolbox.toolbar.insert(item, -1)
+        item.show()
 
         separator = Gtk.SeparatorToolItem()
         separator.props.draw = False
         separator.set_expand(True)
-        toolbar_box.toolbar.insert(separator, -1)
+        toolbox.toolbar.insert(separator, -1)
         separator.show()
 
         stop_button = StopButton(self)
-        toolbar_box.toolbar.insert(stop_button, -1)
+        toolbox.toolbar.insert(stop_button, -1)
         stop_button.show()
 
-        toolbar_box.show()
-        self.set_toolbar_box(toolbar_box)
-        # Create the game instance.
-        self.game = Spirolaterals.Spirolaterals(colors)
+        toolbox.show()
+        self.set_toolbar_box(toolbox)
 
+        self.game = Spirolaterals.Spirolaterals(colors, self)
         # Build the Pygame canvas.
         self.game.canvas = self._pygamecanvas = \
             sugargame.canvas.PygameCanvas(self,
@@ -130,8 +139,7 @@ class PeterActivity(activity.Activity):
         # read_file when resuming from the Journal.
         self.set_canvas(self._pygamecanvas)
 
-        Gdk.Screen.get_default().connect('size-changed',
-                                             self.__configure_cb)
+        Gdk.Screen.get_default().connect('size-changed', self.__configure_cb)
 
         # Start the game running.
         self.game.set_cyan_button(cyan)
@@ -178,7 +186,6 @@ class PeterActivity(activity.Activity):
 
         self._adjustment = Gtk.Adjustment.new(
             200, self.LOWER, self.UPPER, 25, 100, 0)
-        
         self._adjustment.connect('value_changed', self._speed_change_cb)
         self._speed_range = Gtk.HScale.new(self._adjustment)
         self._speed_range.set_inverted(True)
@@ -219,62 +226,156 @@ class PeterActivity(activity.Activity):
         self.game.do_slider(self._adjustment.get_value())
         return True
 
-    def _export_turtleblocks_cb(self, button=None):
-        alert = Alert()
-        alert.props.title = _('Save as TurtleBlocks project')
-        self.add_alert(alert)
-        alert.show()
+    def update_score(self, score):
+        pixbuf = _svg_str_to_pixbuf(self._score_icon(score))
+        self._score_image.set_from_pixbuf(pixbuf)
+        self._score_image.show()
 
-        GObject.idle_add(self._export_turtleblocks, alert)
+    def _score_icon(self, score):
+        return \
+            '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + \
+            '<svg\n' + \
+            'xmlns:dc="http://purl.org/dc/elements/1.1/"\n' + \
+            'xmlns:cc="http://creativecommons.org/ns#"\n' + \
+            'xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"\n' + \
+            'xmlns:svg="http://www.w3.org/2000/svg"\n' + \
+            'xmlns="http://www.w3.org/2000/svg"\n' + \
+            'version="1.1"\n' + \
+            'width="55"\n' + \
+            'height="55"\n' + \
+            'viewBox="0 0 55 55">\n' + \
+            '<path\n' + \
+            'd="M 27.497,50.004 C 39.927,50.004 50,39.937 50,27.508 50,'\
+            '15.076 39.927,4.997 27.497,4.997 15.071,4.997 5,15.076 5,27.508 '\
+            '5,39.937 15.071,50.004 27.497,50.004 z"\n' + \
+            'style="fill:#ffffff;fill-opacity:1" /><text\n' + \
+            'style="fill:#000000;fill-opacity:1;stroke:none;font-family:Sans">'\
+            '<tspan\n' + \
+            'x="27.5"\n' + \
+            'y="37.3"\n' + \
+            'style="font-size:24px;text-align:center;text-anchor:middle">'\
+            '%d' % score + \
+            '</tspan></text>\n' + \
+            '</svg>'
 
-    def _export_turtleblocks(self, alert):
-        data = self.game.tu.current
-        step = 75
-        first = data[0] * step
-        second = data[1] * step
-        third = data[2] * step
-        fourth = data[3] * step
-        fifth = data[4] * step
+    def good_job_image_path(self):
+        pixbuf = _svg_str_to_pixbuf(self._good_job_icon(self._sugarcolors[0]))
+        path = os.path.join(activity.get_activity_root(), 'tmp',
+                            'good-job.png')
+        pixbuf.savev(path, 'png', [], [])
+        return path
 
-        turtle_data = '[[0, ["start", 219], 248, 92, [null, 1]],' +\
-                      '[1, ["repeat", 189], 266, 138, [0, 2, 3, null]],' +\
-                      '[2, ["number", 4], 322, 138, [1, null]],' +\
-                      '[3, "forward", 284, 180, [1, 4, 5]],' +\
-                      ('[4, ["number", %s], 348, 180, [3, null]],' % first) +\
-                      '[5, "right", 284, 222, [3, 6, 7]],' +\
-                      '[6, ["number", 90], 342, 222, [5, null]],' +\
-                      '[7, "forward", 284, 264, [5, 8, 9]],' +\
-                      ('[8, ["number", %s], 348, 264, [7, null]],' % second) +\
-                      '[9, "right", 284, 306, [7, 10, 11]],' +\
-                      '[10, ["number", 90], 342, 306, [9, null]],' +\
-                      '[11, "forward", 284, 348, [9, 12, 13]],' +\
-                      ('[12, ["number", %s], 348, 348, [11, null]],'% third)  +\
-                      '[13, "right", 284, 390, [11, 14, 15]],' +\
-                      '[14, ["number", 90], 342, 390, [13, null]],' +\
-                      '[15, "forward", 284, 432, [13, 16, 17]],' +\
-                      ('[16, ["number", %s], 348, 432, [15, null]],'% fourth)  +\
-                      '[17, "right", 284, 474, [15, 18, 19]],' +\
-                      '[18, ["number", 90], 342, 474, [17, null]],' +\
-                      '[19, "forward", 284, 516, [17, 20, 21]],' +\
-                      ('[20, ["number", %s], 348, 516, [19, null]],'% fifth)  +\
-                      '[21, "right", 284, 558, [19, 22, null]],' +\
-                      '[22, ["number", 90], 342, 558, [21, null]]]'
+    def good_job_pixbuf(self, color):
+        return _svg_str_to_pixbuf(self._good_job_icon(color))
 
-        file_path = os.path.join(self.datapath, 'output.tb')
-        with open(file_path, "w") as file:
-            file.write(turtle_data)
+    def _good_job_icon(self, color):
+        return \
+            '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + \
+            '<svg\n' + \
+            'xmlns:dc="http://purl.org/dc/elements/1.1/"\n' + \
+            'xmlns:cc="http://creativecommons.org/ns#"\n' + \
+            'xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"\n' + \
+            'xmlns:svg="http://www.w3.org/2000/svg"\n' + \
+            'xmlns="http://www.w3.org/2000/svg"\n' + \
+            'version="1.1"\n' + \
+            'width="700"\n' + \
+            'height="150">\n' + \
+            '<g\n' + \
+            'transform="translate(-322.5,-409.12501)">\n' + \
+            '<g\n' + \
+            'transform="translate(-1,1)"\n' + \
+            'style="stroke-width:3;stroke-miterlimit:4;">\n' + \
+            '<path\n' + \
+            'd="m 325,470.5 197,1 0,68 -196.5,17 z"\n' + \
+            'style="fill:%s;' % color + \
+            'fill-opacity:1;stroke:#ffffff;stroke-width:3;\n' + \
+            'stroke-linejoin:miter;stroke-miterlimit:4;\n' + \
+            'stroke-opacity:1;" />\n' + \
+            '<path\n' + \
+            'd="m 523.58046,470.41954 c -0.13908,-5.262 5.74754,-7.078\n' + \
+            '9.44636,-9 8.61617,-4.2445 9.8557,-8.02297 12.473,-16.41954\n' + \
+            '1.76159,-5.65019 1.81398,-11.7016 3,-17.5 0.72099,-3.52486\n' + \
+            '0.49972,-7.50946 2.5,-10.5 2.0574,-3.07595 5.4789,-5.36144\n' + \
+            '9,-6.5 2.6959,-0.8717 5.8359,-0.96454 8.5,0 2.4479,0.88627\n' + \
+            '4.49712,2.87417 6,5 2.77016,3.91842 4.78743,10.31663 \n' + \
+            '4.20977,15.08046 -1.40645,11.59866 -4.33199,20.55541\n' + \
+            '-6.91954,29.18295 2.63914,4.35385 1.09045,0.91477\n' + \
+            '19.37546,1.70977 4.12891,2.16337 7.61581,4.72782\n' + \
+            '6.59773,10.23659 1.52418,5.05477 -3.98096,6.45467\n' + \
+            '-3.15615,9.34387 5.05679,2.02909 10.82214,5.37105\n' + \
+            '9.94637,10.268 0.7607,9.8204 -3.3900,8.29484 -5.5,11.67817\n' + \
+            '1.54287,3.42335 2.23857,5.25348 2.91954,9.16 0.8917,5.11047\n' + \
+            '-2.53079,8.96195 -9.55364,11.05363 -1.03862,3.55186\n' + \
+            '1.99938,6.551 2.5536,10.20977 0.64307,4.245 -1.56067,7.6627\n' + \
+            '-4.47318,9.08046 -25.61313,0.54849 -33.0002,0.80747 -57.5,0\n' + \
+            '-2.385,-0.0786 -3.62433,0.62247 -6.20977,-2.02682\n' + \
+            '-1.45872,-1.49473 -2.77989,-1.80492 -2.79023,-3.44636 z"\n' + \
+            'style="fill:%s;' % color + \
+            'fill-opacity:1;stroke:#ffffff;stroke-width:3;\n' + \
+            'stroke-linejoin:miter;stroke-miterlimit:4;\n' + \
+            'stroke-opacity:1;stroke-dasharray:none" />\n' + \
+            '<rect\n' + \
+            'width="45"\n' + \
+            'height="20"\n' + \
+            'ry="10"\n' + \
+            'x="571.5"\n' + \
+            'y="461"\n' + \
+            'style="fill:%s;' % color + \
+            'fill-opacity:1;stroke:#ffffff;\n' + \
+            'stroke-width:3;stroke-linecap:round;stroke-linejoin:round;\n' + \
+            'stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;\n' + \
+            'stroke-dashoffset:0" />\n' + \
+            '<rect\n' + \
+            'width="57"\n' + \
+            'height="20"\n' + \
+            'ry="10"\n' + \
+            'x="566"\n' + \
+            'y="483"\n' + \
+            'style="fill:%s;' % color + \
+            'fill-opacity:1;stroke:#ffffff;\n' + \
+            'stroke-width:3;stroke-linecap:round;stroke-linejoin:round;\n' + \
+            'stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;\n' + \
+            'stroke-dashoffset:0" />\n' + \
+            '<rect\n' + \
+            'width="54.5"\n' + \
+            'height="20"\n' + \
+            'ry="10"\n' + \
+            'x="566.5"\n' + \
+            'y="502.5"\n' + \
+            'style="fill:%s;' % color + \
+            'fill-opacity:1;stroke:#ffffff;\n' + \
+            'stroke-width:3;stroke-linecap:round;stroke-linejoin:round;\n' + \
+            'stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;\n' + \
+            'stroke-dashoffset:0" />\n' + \
+            '<rect\n' + \
+            'width="40.5"\n' + \
+            'height="20"\n' + \
+            'ry="10"\n' + \
+            'x="574"\n' + \
+            'y="523"\n' + \
+            'style="fill:%s;' % color + \
+            'fill-opacity:1;stroke:#ffffff;\n' + \
+            'stroke-width:3;stroke-linecap:round;stroke-linejoin:round;\n' + \
+            'stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;\n' + \
+            'stroke-dashoffset:0" />\n' + \
+            '</g>\n' + \
+            '<text\n' + \
+            'style="font-size:16px;font-style:normal;font-weight:normal;\n' + \
+            'text-align:end;line-height:125%;letter-spacing:0px;\n' + \
+            'text-anchor:end;fill:#ff0000;fill-opacity:1;\n' + \
+            'stroke:none;font-family:Sans"><tspan\n' + \
+            'x="880" y="507"\n' + \
+            'style="font-size:48px;fill:%s;fill-opacity:1">\n' % color + \
+            _('Good job!') + \
+            '</tspan></text>\n' + \
+            '</g>\n' + \
+            '</svg>'
 
-        dsobject = datastore.create()
-        dsobject.metadata['title'] = '%s %s' % (self.metadata['title'], _('TurtleBlocks'))
-        dsobject.metadata['icon-color'] = profile.get_color().to_string()
-        dsobject.metadata['mime_type'] = 'application/x-turtle-art'
-        dsobject.metadata['activity'] = 'org.laptop.TurtleArtActivity'
-        dsobject.set_file_path(file_path)
-        datastore.write(dsobject)
-        dsobject.destroy()
-        os.remove(file_path)
 
-        GObject.timeout_add(1000, self._remove_alert, alert)
-
-    def _remove_alert(self, alert):
-        self.remove_alert(alert)
+def _svg_str_to_pixbuf(svg_string):
+    ''' Load pixbuf from SVG string '''
+    pl = GdkPixbuf.PixbufLoader.new_with_type('svg')
+    pl.write(svg_string)
+    pl.close()
+    pixbuf = pl.get_pixbuf()
+    return pixbuf

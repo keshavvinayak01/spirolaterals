@@ -4,7 +4,7 @@ from gi.repository import GObject
 from gi.repository import GLib
 from sugar3.activity.activity import PREVIEW_SIZE
 import pygame
-import event
+from . import event
 
 CANVAS = None
 
@@ -15,7 +15,7 @@ class PygameCanvas(Gtk.EventBox):
         GObject.GObject.__init__(self)
 
         global CANVAS
-        assert CANVAS == None, "Only one PygameCanvas can be created, ever."
+        assert CANVAS is None, "Only one PygameCanvas can be created, ever."
         CANVAS = self
 
         # Initialize Events translator before widget gets "realized".

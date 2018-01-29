@@ -10,7 +10,6 @@
 """
 import os
 import sys
-import copy
 import random
 import logging
 import pygame
@@ -33,22 +32,22 @@ def exit():
 
 
 def save():
-    dir = ''
-    dir = os.environ.get('SUGAR_ACTIVITY_ROOT')
-    if dir is None:
-        dir = ''
-    fname = os.path.join(dir, 'data', 'spiro.dat')
+    directory = ''
+    directory = os.environ.get('SUGAR_ACTIVITY_ROOT')
+    if directory is None:
+        directory = ''
+    fname = os.path.join(directory, 'data', 'spiro.dat')
     f = open(fname, 'w')
     load_save.save(f)
     f.close
 
 
 def load():
-    dir = ''
-    dir = os.environ.get('SUGAR_ACTIVITY_ROOT')
-    if dir is None:
-        dir = ''
-    fname = os.path.join(dir, 'data', 'spiro.dat')
+    directory = ''
+    directory = os.environ.get('SUGAR_ACTIVITY_ROOT')
+    if directory is None:
+        directory = ''
+    fname = os.path.join(directory, 'data', 'spiro.dat')
     try:
         f = open(fname, 'r')
     except Exception as e:
