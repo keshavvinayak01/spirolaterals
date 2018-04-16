@@ -5,5 +5,5 @@ host_version = 1
 bundle_id = org.laptop.community.Spirolaterals
 icon = activity
 show_launcher = yes
-exec = sugar-activity activity.PeterActivity
+exec = sugar-activity3 activity.PeterActivity
 summary = turtle pattern programming challenge
